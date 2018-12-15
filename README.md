@@ -23,3 +23,6 @@ Les données sont fournies en format CSV avec les intitulés suivants :
   15. Négatif ou inversible : support du cliché
   16. Couleur ou noir et blanc
   17. Remarques : informations du photographe des archives sur les photographies
+
+## Démonstration (Binder):
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mhoangvslev/PhotographiesArchiveSQL/master)
