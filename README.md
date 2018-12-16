@@ -25,4 +25,4 @@ Les données sont fournies en format CSV avec les intitulés suivants :
   17. Remarques : informations du photographe des archives sur les photographies
 
 ## Démonstration (Binder):
-Progres: ![Trello](https://trello.com/b/traOSgOr/tea-bd)
+Progres: [Trello](https://trello.com/b/traOSgOr/tea-bd)
