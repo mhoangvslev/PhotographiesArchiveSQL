@@ -26,5 +26,3 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 
 ## Démonstration (Binder):
 Progres: ![Trello](https://trello.com/b/traOSgOr/tea-bd)
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mhoangvslev/PhotographiesArchiveSQL/master)
