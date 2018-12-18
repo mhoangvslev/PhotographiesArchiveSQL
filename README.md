@@ -25,4 +25,6 @@ Les données sont fournies en format CSV avec les intitulés suivants :
   17. Remarques : informations du photographe des archives sur les photographies
 
 ## Démonstration (Binder):
-Progres: [Trello](https://trello.com/b/traOSgOr/tea-bd)
+[Trello](https://trello.com/b/traOSgOr/tea-bd)
+
+[![Waffle.io - Issues in progress](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.png?label=in%20progress&title=In%20Progress)](http://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
