@@ -66,9 +66,7 @@
     \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
                                 % normalem makes italics be italics, not underlines
     \usepackage{mathrsfs}
-\usepackage{verbatim}
-    \usepackage{float}
-    \restylefloat{table}
+    
 
     
     
@@ -151,14 +149,13 @@
     \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
     % Document parameters
     % Document title
-   \title{Prétraitement - Importation et nettoyage de données}
-    \author{
-	Amina, KACIMI\\
-	\and
-	Valentin, DEHAINAULT\\
-	\and
-	Minh-Hoang, DANG\\	
-}   
+    \title{Prétraitement - Normalisation}
+	\author{
+	Amina, KACIMI \and
+	Valentin, DEHAINAULT \and
+	Minh-Hoang DANG
+}
+    
     
     
     
@@ -297,22 +294,32 @@
     
     
 
-    \begin{comment}
-\title{Prétraitement - Importation et nettoyage de données}
-    \author{
-	Amina, KACIMI\\
-	\and
-	Valentin, DEHAINAULT\\
-	\and
-	Minh-Hoang, DANG\\	
-}
-\end{comment}
-\begin{comment}
+    
    \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}1}]:} \PY{c+c1}{\PYZhy{}\PYZhy{} connection: host=\PYZsq{}localhost\PYZsq{} dbname=\PYZsq{}Photographies\PYZsq{} user=\PYZsq{}postgres\PYZsq{}}
         \PY{k}{password}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{postgres}\PY{l+s+s1}{\PYZsq{}}
 \end{Verbatim}
-\end{comment}
+
+    \hypertarget{pruxe9-requis}{%
+\section{Pré-requis:}\label{pruxe9-requis}}
+
+Pour pouvoir utiliser ce Notebook, il faut préparer votre environnement
+de travail avec certains outils ci-dessous.
+
+\hypertarget{pgadmin}{%
+\subsection{pgAdmin:}\label{pgadmin}}
+
+La base \texttt{Photographies} doit être crée préalablement et les
+parametres de connection (premiere cellule) doivent etre adaptées.
+
+\hypertarget{postgresql-kernel}{%
+\subsection{PostgreSQL kernel:}\label{postgresql-kernel}}
+
+La \href{https://github.com/mhoangvslev/postgres_kernel}{version
+experimentale} doit être installé:
+\texttt{pip\ install\ git+https://github.com/mhoangvslev/postgres\_kernel/}.
+Les extensions Jupyter sont optionels.
+
     \hypertarget{importer-les-donuxe9es-brutes-dans-le-sgbd}{%
 \section{Importer les donées brutes dans le
 SGBD}\label{importer-les-donuxe9es-brutes-dans-le-sgbd}}
@@ -331,18 +338,22 @@ Nous allons donc préparer deux tables vides, avec les attributs de types
 adéquats, puis les règles pour les données entrantes. La première table,
 nommée \texttt{CorrectionTemp} servira à la redirection des données vers
 la vraie table \texttt{Correction}, via une multitude de triggers.
-%\usepackage{verbatim}
-\begin{comment}
+
    \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{c+cm}{/*}\PY{c+cm}{DROP DATABASE IF EXISTS \PYZsq{}Photographies\PYZsq{};}
-        \PY{c+cm}{CREATE DATABASE \PYZsq{}Photographies\PYZsq{}}
-        \PY{c+cm}{    WITH}
-        \PY{c+cm}{    OWNER = postgres}
-        \PY{c+cm}{    ENCODING = \PYZsq{}UTF8\PYZsq{}}
-        \PY{c+cm}{    LC\PYZus{}COLLATE = \PYZsq{}French\PYZus{}France.1252\PYZsq{}}
-        \PY{c+cm}{    LC\PYZus{}CTYPE = \PYZsq{}French\PYZus{}France.1252\PYZsq{}}
-        \PY{c+cm}{    TABLESPACE = pg\PYZus{}default}
-        \PY{c+cm}{    CONNECTION LIMIT = \PYZhy{}1;}\PY{c+cm}{*/}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{k}{DROP} \PY{k}{EXTENSION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{btree\PYZus{}gin} \PY{k}{CASCADE}\PY{p}{;}
+        \PY{c+c1}{\PYZhy{}\PYZhy{}CREATE EXTENSION pg\PYZus{}trgm;}
+        \PY{k}{CREATE} \PY{k}{EXTENSION} \PY{n}{btree\PYZus{}gin}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ COMPOSITE TYPE: CoordLambert93}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ C\PYZsq{}est un type qui contient un array de varchar}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Le champ acceuillit les données préparées pour l\PYZsq{}insertion}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{DROP} \PY{k}{TYPE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{CoordLambert93} \PY{k}{CASCADE}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{TYPE} \PY{n}{CoordLambert93} \PY{k}{AS} \PY{p}{(}
+            \PY{n}{CoordX} \PY{n+nb}{numeric}\PY{p}{,}
+            \PY{n}{CoordY} \PY{n+nb}{numeric}
+        \PY{p}{)}\PY{p}{;}
         
         \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{CorrectionTemp}\PY{p}{;}
         \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{CorrectionTemp}\PY{p}{(}
@@ -356,39 +367,83 @@ la vraie table \texttt{Correction}, via une multitude de triggers.
             \PY{n+nb}{Date} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Notebp} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{FicNum} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{Idx\PYZus{}per} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Idx\PYZus{}Ico} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{NbrCli} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{TailleCli} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
-            \PY{n}{Taille} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{N\PYZus{}V} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{C\PYZus{}G} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Remarques} \PY{n+nb}{varchar} \PY{k}{NULL}
         \PY{p}{)}\PY{p}{;}
         
         
-        
         \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{Correction}\PY{p}{;}
         \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Correction}\PY{p}{(}
-            \PY{n}{ReferenceCindoc} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{6}\PY{p}{)}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{}SEP |}
+            \PY{n}{ReferenceCindoc} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{6}\PY{p}{)} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{}SEP |}
             \PY{n}{Serie} \PY{n+nb}{varchar} \PY{k}{NULL} \PY{p}{,}
             \PY{n}{Article} \PY{n+nb}{int} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{}AUTO INCREMENT, PRIMARY KEY}
-            \PY{n}{Discriminant} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{Discriminant} \PY{n+nb}{int} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Ville} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Sujet} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} SEP ,}
             \PY{n}{DescDet} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n+nb}{Date} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} remove first chunk, parse date from french}
             \PY{n}{NoteBP} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} SEP /}
             \PY{n}{FicNum} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} SEP /}
+            \PY{n}{Idx\PYZus{}per} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
             \PY{n}{Idx\PYZus{}Ico} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} SEP /, regex CCCCDDD\PYZus{}[SERIE]\PYZus{}DDDDDD\PYZus{}D}
             \PY{n}{NbrCli} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} SEP /, |}
             \PY{n}{TailleCli} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{}SEP, par NbrCli}
-            \PY{n}{Taille} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} FNable}
-            \PY{n}{N\PYZus{}V} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} regex NEG|INV}
-            \PY{n}{C\PYZus{}G} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} regex \PYZsq{}GSC\PYZsq{}|\PYZsq{}CLR\PYZsq{}}
-            \PY{n}{Remarques} \PY{n+nb}{varchar} \PY{k}{NULL} \PY{c+c1}{\PYZhy{}\PYZhy{} S}
+            \PY{n}{N\PYZus{}V} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{3}\PY{p}{)} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} regex NEG|INV}
+            \PY{n}{C\PYZus{}G} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{3}\PY{p}{)} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} regex \PYZsq{}GSC\PYZsq{}|\PYZsq{}CLR\PYZsq{}}
+            \PY{n}{Remarques} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,} \PY{c+c1}{\PYZhy{}\PYZhy{} S}
+            \PY{n}{Coordonnees} \PY{n}{CoordLambert93} \PY{k}{NULL}
         \PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{VilleTemp}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{VilleTemp} \PY{p}{(}
+            \PY{n}{viReference} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viCodeInsee} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viCodePostal} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viVille} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viHabitants} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viDensite} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viLatitude} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viLongitude} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{viLambertX} \PY{n+nb}{numeric}\PY{p}{,}
+            \PY{n}{viLambertY} \PY{n+nb}{numeric}
+        \PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{COPY} \PY{n}{VilleTemp} \PY{p}{(}
+            \PY{n}{viReference}\PY{p}{,}
+            \PY{n}{viCodeInsee}\PY{p}{,}
+            \PY{n}{viCodePostal}\PY{p}{,}
+            \PY{n}{viVille}\PY{p}{,}
+            \PY{n}{viHabitants}\PY{p}{,}
+            \PY{n}{viDensite}\PY{p}{,}
+            \PY{n}{viLatitude}\PY{p}{,}
+            \PY{n}{viLongitude}\PY{p}{,}
+            \PY{n}{viLambertX}\PY{p}{,}
+            \PY{n}{viLambertY}
+        
+        \PY{p}{)} \PY{k}{FROM} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/villes.csv}\PY{l+s+s1}{\PYZsq{}} \PY{k}{DELIMITER} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{;}\PY{l+s+s1}{\PYZsq{}} \PY{k}{CSV} \PY{k}{HEADER}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{=============================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ INDEX: Ville\PYZus{}Nom\PYZus{}Coords\PYZus{}Key}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Optimiser: la requête sur la table ville comme on n\PYZsq{}a besoin que de 2 attributs}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ 5 mins \PYZhy{}\PYZgt{} 28s}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{=============================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}Ville\PYZus{}Nom\PYZus{}Coords} \PY{k}{ON} \PY{n}{VilleTemp}\PY{p}{(}\PY{n}{viVille}\PY{p}{,} \PY{n}{viLambertX}\PY{p}{,} \PY{n}{viLambertY}\PY{p}{)}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}Ville\PYZus{}Patterns} \PY{k}{ON} \PY{n}{VilleTemp} \PY{k}{USING} \PY{n}{gin}\PY{p}{(}\PY{n}{viVille} \PY{n}{gin\PYZus{}trgm\PYZus{}ops}\PY{p}{)}\PY{p}{;}
 \end{Verbatim}
-\end{comment}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+NOTICE:  drop cascades to function traitement\_coord(anyarray)
+NOTICE:  table "correctiontemp" does not exist, skipping
+NOTICE:  table "correction" does not exist, skipping
+NOTICE:  table "villetemp" does not exist, skipping
+
+    \end{Verbatim}
+
     \hypertarget{nettoyage-de-donnuxe9es}{%
 \section{Nettoyage de données}\label{nettoyage-de-donnuxe9es}}
 
@@ -397,25 +452,7 @@ Comme nous l'avons discuté précédemment, nous allons écrire un
 résultat le plus satisfaisant, nous avons besoins d'une librairie de
 fonctions qui permettent de traiter les données entrantes sous forme de
 \texttt{string}.
-% Please add the following required packages to your document preamble:
-% \usepackage{graphicx}
-% \usepackage{float}
-% \restylefloat{table}
 
-
-\begin{table}[H]
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{|l|l|}
-\hline
-Fonction                                                                                             & But                                                                                                                                                                                                                \\ \hline
-split\_string(str,delim1, delim2)                                                                    & Séparer un string délimité par deux délimiteurs en un ensemble de strings                                                                                                                                          \\ \hline
-\begin{tabular}[c]{@{}l@{}}traitement\_date(str)format d’entrée : \\ année / mois année\end{tabular} & \begin{tabular}[c]{@{}l@{}}Retourner un string contenant uniquement \\ le mois si précisé et l’année de prise d’une photo\end{tabular}                                                                             \\ \hline
-traitement\_n\_v(str)                                                                                & \begin{tabular}[c]{@{}l@{}}Harmoniser la colonne négative ou inversible de manière \\ à ce qu’elle contienne NEG pour négatif et INV pour inversible\end{tabular}                                                  \\ \hline
-array\_expand(array, maxlength, fill)                                                                & \begin{tabular}[c]{@{}l@{}}Étendre le array jusqu’à certaine taille en ajoutant les éléments. \\ Cette fonction est particulièrement utile pour combler les vides \\ après la séparation des données.\end{tabular} \\ \hline
-\end{tabular}%
-}
-\end{table}%\usepackage{verbatim}
-\begin{comment}
    \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}3}]:} \PY{c+cm}{/*}\PY{c+cm}{*}
         \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ COMPOSITE TYPE: insert\PYZus{}array}
@@ -454,9 +491,45 @@ array\_expand(array, maxlength, fill)                                           
         \PY{c+cm}{ }\PY{c+cm}{*/}
         \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}date}\PY{p}{;}
         \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}date}\PY{p}{(}\PY{n}{\PYZus{}str} \PY{n+nb}{varchar}\PY{p}{)}
-        \PY{k}{RETURNS} \PY{n+nb}{varchar} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{res} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{\PYZus{}str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.*:(.*)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{k}{temp} \PY{n+nb}{varchar}\PY{p}{;}
+                \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
             \PY{k}{BEGIN}
-                \PY{k}{RETURN} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{n}{\PYZus{}str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{2}\PY{p}{)}\PY{p}{;}
+                \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1.}\PY{l+m+mf}{.}\PY{k}{coalesce}\PY{p}{(}\PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{0}\PY{p}{)} \PY{k}{LOOP}
+                    \PY{c+c1}{\PYZhy{}\PYZhy{} Double jour: 29\PYZhy{}30 Juin 2011}
+                    \PY{k}{IF} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZti{}*} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{[0\PYZhy{}9]\PYZob{}1,2\PYZcb{}\PYZhy{}[0\PYZhy{}9]\PYZob{}1,2\PYZcb{}.*}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN}
+                        \PY{k}{temp} \PY{o}{:=} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}append}\PY{p}{(}
+                            \PY{n}{res}\PY{p}{,} \PY{n}{concat}\PY{p}{(}
+                                \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{k}{temp}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,}
+                                \PY{k}{substring}\PY{p}{(}\PY{k}{temp} \PY{k}{from} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}s*\PYZbs{}w+\PYZbs{}s*[0\PYZhy{}9]\PYZob{}4\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+                            \PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}
+                        \PY{p}{)}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}append}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{k}{temp}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{2}\PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{)}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}remove}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+        
+                    \PY{c+c1}{\PYZhy{}\PYZhy{} Double mois: 29 Juin\PYZhy{}Juillet 2011}
+                    \PY{k}{ELSIF} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZti{}*} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.*\PYZbs{}w+\PYZhy{}\PYZbs{}w+.*}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN}
+                        \PY{k}{temp} \PY{o}{:=} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}append}\PY{p}{(}
+                            \PY{n}{res}\PY{p}{,} \PY{n}{concat}\PY{p}{(}
+                                \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{k}{temp}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,}
+                                \PY{k}{substring}\PY{p}{(}\PY{k}{temp} \PY{k}{from} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}s*[0\PYZhy{}9]\PYZob{}4\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+                            \PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}
+                        \PY{p}{)}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}append}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{k}{temp}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{2}\PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{)}\PY{p}{;}
+                        \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}remove}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{n}{res}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+                \PY{k}{END} \PY{k}{LOOP}\PY{p}{;}
+        
+                \PY{c+cm}{/*}\PY{c+cm}{FOR i IN 1..coalesce(array\PYZus{}length(res, 1), 0) LOOP}
+        \PY{c+cm}{            res[i] := trim(BOTH FROM res[i]);}
+        \PY{c+cm}{        END LOOP;}\PY{c+cm}{*/}
+                \PY{n}{res} \PY{o}{:=} \PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{k}{trim}\PY{p}{(}\PY{k}{BOTH} \PY{k}{FROM} \PY{n}{d}\PY{p}{)} \PY{k}{FROM} \PY{n}{unnest}\PY{p}{(}\PY{n}{res}\PY{p}{)} \PY{n}{d}\PY{p}{)}\PY{p}{;}
+        
+                \PY{k}{RETURN} \PY{n}{res}\PY{p}{;}
             \PY{k}{END}\PY{p}{;}
         \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
         
@@ -475,7 +548,7 @@ array\_expand(array, maxlength, fill)                                           
                 \PY{k}{END} \PY{k}{IF}\PY{p}{;}
         
                 \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1} \PY{l+m+mf}{.}\PY{l+m+mf}{.} \PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{strSet}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)} \PY{k}{LOOP}
-                    \PY{k}{IF} \PY{p}{(}\PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZti{}*} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.*négatif.*}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{IF} \PY{p}{(}\PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{LIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}négatif\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{THEN}
                         \PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{:=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{NEG}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
                     \PY{k}{ELSE}
                         \PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{:=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{INV}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
@@ -508,8 +581,9 @@ array\_expand(array, maxlength, fill)                                           
         \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
         
         \PY{c+cm}{/*}\PY{c+cm}{*}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}n\PYZus{}v(str)}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{  négatif = NEG, inversible = INV, details += remarques}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: getMaxLength(VARIADIC arr insert\PYZus{}array[] )}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{  Pour chaque ligne d\PYZsq{}insertion, on prend l\PYZsq{}attribut avec le plus grand nombre de}
+        \PY{c+cm}{colonne}
         \PY{c+cm}{ }\PY{c+cm}{*/}
         \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{getMaxLength}\PY{p}{;}
         \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{getMaxLength}\PY{p}{(}\PY{k}{VARIADIC} \PY{n}{arr} \PY{n}{insert\PYZus{}array}\PY{p}{[}\PY{p}{]} \PY{p}{)}
@@ -524,14 +598,133 @@ array\_expand(array, maxlength, fill)                                           
                 \PY{k}{RETURN} \PY{n}{result}\PY{p}{;}
             \PY{k}{END}\PY{p}{;}
         \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}discriminant(arr anyarray)}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Numéroter les photos d\PYZsq{}un même article}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}discriminant}\PY{p}{(}\PY{n}{arr} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{int}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
+                \PY{n}{length} \PY{n+nb}{int} \PY{o}{:=} \PY{k}{coalesce}\PY{p}{(}\PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{arr}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{0}\PY{p}{)}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1.}\PY{l+m+mf}{.}\PY{n}{length} \PY{k}{LOOP}
+                    \PY{n}{arr}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{i}\PY{p}{;}
+                \PY{k}{END} \PY{k}{LOOP}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{arr}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: pretty(strarr varchar[])}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Rendre les attributs texts plus homogènes et présentables}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{pretty}\PY{p}{(}\PY{n}{strarr} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
+                \PY{n}{length} \PY{n+nb}{int} \PY{o}{:=} \PY{k}{coalesce}\PY{p}{(}\PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{strarr}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{0}\PY{p}{)}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1.}\PY{l+m+mf}{.}\PY{n}{length} \PY{k}{LOOP}
+                    \PY{n}{strarr}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{k}{TRIM}\PY{p}{(}\PY{k}{BOTH} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}} \PY{k}{FROM} \PY{n}{strarr}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+                    \PY{n}{strarr}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{strarr}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{([a\PYZhy{}z])([A\PYZhy{}Z])}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1\PYZhy{}\PYZbs{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{k}{END} \PY{k}{LOOP}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{strarr}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}c\PYZus{}g(str)}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{  coulieur = CLR, noir\PYZam{}blanc = GSC (greyscale)}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}c\PYZus{}g}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}c\PYZus{}g}\PY{p}{(} \PY{n}{strSet} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{3}\PY{p}{)}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{strSet} \PY{k}{is} \PY{k}{NULL} \PY{k}{THEN}
+                    \PY{k}{RETURN} \PY{k}{NULL}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1} \PY{l+m+mf}{.}\PY{l+m+mf}{.} \PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{strSet}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)} \PY{k}{LOOP}
+                    \PY{k}{IF} \PY{p}{(}\PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}nb\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{THEN}
+                        \PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{:=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{GSC}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                    \PY{k}{ELSE}
+                        \PY{n}{strSet}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{:=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CLR}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+                \PY{k}{END} \PY{k}{LOOP}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{strSet}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}c\PYZus{}g(str)}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{  coulieur = CLR, noir\PYZam{}blanc = GSC (greyscale)}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}coord}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}coord}\PY{p}{(} \PY{n}{villeArr} \PY{n+nb}{anyarray}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n}{CoordLambert93}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{res} \PY{n}{CoordLambert93} \PY{k}{ARRAY}\PY{p}{;}
+                \PY{k}{row} \PY{n}{CoordLambert93}\PY{p}{;}
+                \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
+                \PY{n}{CoordX} \PY{n+nb}{numeric}\PY{p}{;}
+                \PY{n}{CoordY} \PY{n+nb}{numeric}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1.}\PY{l+m+mf}{.}\PY{k}{coalesce}\PY{p}{(}\PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{villeArr}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{0}\PY{p}{)} \PY{k}{LOOP}
+                    \PY{k}{SELECT} \PY{n}{viLambertX}\PY{p}{,} \PY{n}{viLambertY} \PY{k}{INTO} \PY{n}{CoordX}\PY{p}{,} \PY{n}{CoordY}
+                    \PY{k}{FROM} \PY{n}{VilleTemp}
+                    \PY{k}{WHERE} \PY{n}{viVille} \PY{k}{ILIKE} \PY{n}{villeArr}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{;}
+        
+                    \PY{k}{row}\PY{l+m+mf}{.}\PY{n}{CoordX} \PY{o}{:=} \PY{n}{CoordX}\PY{p}{;}
+                    \PY{k}{row}\PY{l+m+mf}{.}\PY{n}{CoordY} \PY{o}{:=} \PY{n}{CoordY}\PY{p}{;}
+        
+                    \PY{n}{res} \PY{o}{=} \PY{n}{array\PYZus{}append}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{k}{row}\PY{p}{)}\PY{p}{;}
+                \PY{k}{END} \PY{k}{LOOP}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{res}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}oeuvre(str)}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}oeuvre}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}oeuvre}\PY{p}{(}\PY{n}{str} \PY{n+nb}{varchar}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{str} \PY{k}{IS} \PY{k}{NULL} \PY{k}{THEN} \PY{k}{RETURN} \PY{k}{NULL}\PY{p}{;} \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{split\PYZus{}string}\PY{p}{(}
+                    \PY{n}{regexp\PYZus{}replace}\PY{p}{(}
+                        \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{([A\PYZhy{}Z])\PYZbs{}s*,\PYZbs{}s*([A\PYZhy{}Z])}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1 \PYZbs{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}
+                                   \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,\PYZbs{}s*(\PYZbs{}()}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ \PYZbs{}1}\PY{l+s+s1}{\PYZsq{}}
+                    \PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}
+                \PY{p}{)}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}cliche(str)}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}cliche}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}cliche}\PY{p}{(}\PY{n}{str} \PY{n+nb}{varchar}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{BEGIN}
+                \PY{k}{RETURN} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}
+                    \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{([0\PYZhy{}9][0\PYZhy{}9]*),([0\PYZhy{}9])}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1.\PYZbs{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{g}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
 \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
 NOTICE:  drop cascades to function getmaxlength(insert\_array[])
 NOTICE:  function getmaxlength() does not exist, skipping
+NOTICE:  function traitement\_coord() does not exist, skipping
 
     \end{Verbatim}
-\end{comment}
+
     \hypertarget{uxe9liminer-les-incohuxe9rences-dans-les-donnuxe9es}{%
 \subsection{Éliminer les incohérences dans les
 données}\label{uxe9liminer-les-incohuxe9rences-dans-les-donnuxe9es}}
@@ -557,128 +750,7 @@ une même case). Avec les délimiteurs, on sépare les informations
 combinées dans un array correspondant à l'attribut concerné. Finalement,
 on passe les attributs dans la clause \texttt{VALUES} de
 \texttt{INSERT}.
-%\usepackage{verbatim}
-\begin{comment}
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{c+cm}{/*}\PY{c+cm}{*}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TRIGGER FUNCTION: separer\PYZus{}ligne\PYZus{}combinees}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Détecter les lignes combinées, séparer les bouts et}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ faire les insertions (pas nécessairement propre)}
-        \PY{c+cm}{ }\PY{c+cm}{*/}
-        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{separer\PYZus{}ligne\PYZus{}combinees}\PY{p}{(}\PY{p}{)}
-        \PY{k}{RETURNS} \PY{k}{TRIGGER} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
-            \PY{k}{DECLARE}
-                \PY{n}{ReferenceCindocVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{DiscriminantVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{VilleVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{SujetVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{NoteBPVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{FicNumVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{Idx\PYZus{}IcoVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{NbrCliVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{TailleCliVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{N\PYZus{}VVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-                \PY{n}{C\PYZus{}GVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
-        
-                \PY{n}{maxLength} \PY{n+nb}{int}\PY{p}{;}
-        
-                \PY{n}{insertVals} \PY{n}{insert\PYZus{}array}\PY{p}{[}\PY{p}{]}\PY{p}{;}
-        
-            \PY{k}{BEGIN}
-                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
-                \PY{c+c1}{\PYZhy{}\PYZhy{} Traitement des données}
-                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
-                \PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{k}{replace}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Discriminant}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{sujet}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NoteBP}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{FicNum}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}ico}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NbrCli}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{TailleCli}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}n\PYZus{}v}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{n\PYZus{}v}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
-                \PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{c\PYZus{}g}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-        
-                \PY{n}{maxLength} \PY{o}{:=} \PY{n}{getMaxLength}\PY{p}{(}
-                        \PY{n}{ReferenceCindocVals}\PY{p}{,}
-                        \PY{n}{DiscriminantVals}\PY{p}{,}
-                        \PY{n}{VilleVals}\PY{p}{,}
-                        \PY{n}{SujetVals}\PY{p}{,}
-                        \PY{n}{NoteBPVals}\PY{p}{,}
-                        \PY{n}{FicNumVals}\PY{p}{,}
-                        \PY{n}{Idx\PYZus{}IcoVals}\PY{p}{,}
-                        \PY{n}{NbrCliVals}\PY{p}{,}
-                        \PY{n}{TailleCliVals}\PY{p}{,}
-                        \PY{n}{N\PYZus{}VVals}\PY{p}{,}
-                        \PY{n}{C\PYZus{}GVals}
-                \PY{p}{)}\PY{p}{;}
-        
-                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
-                \PY{c+c1}{\PYZhy{}\PYZhy{} Insérer dans la bonne table les données séparées}
-                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
-                \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Correction} \PY{p}{(}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{Serie}\PY{p}{,} \PY{n}{Article}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{,} \PY{n}{Ville}\PY{p}{,}
-                        \PY{n}{Sujet}\PY{p}{,} \PY{n}{DescDet}\PY{p}{,} \PY{n+nb}{Date}\PY{p}{,} \PY{n}{NoteBP}\PY{p}{,} \PY{n}{FicNum}\PY{p}{,} \PY{n}{Idx\PYZus{}Ico}\PY{p}{,} \PY{n}{NbrCli}\PY{p}{,}
-                        \PY{n}{TailleCli}\PY{p}{,} \PY{n}{Taille}\PY{p}{,} \PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{Remarques}\PY{p}{)}
-                    \PY{k}{VALUES}\PY{p}{(}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
-        \PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{serie}\PY{p}{,}
-                        \PY{k}{cast}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{article} \PY{k}{as} \PY{n+nb}{int}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
-        \PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{DescDet}\PY{p}{,}
-                        \PY{n}{traitement\PYZus{}date}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n+nb}{DATE}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
-        \PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
-        \PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Taille}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{,}
-                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Remarques}
-                    \PY{p}{)}\PY{p}{;}
-        
-                \PY{k}{RETURN} \PY{n}{NEW}\PY{p}{;}
-            \PY{k}{END}\PY{p}{;}
-        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
-        
-        \PY{c+cm}{/*}\PY{c+cm}{*}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TRIGGER: trigger\PYZus{}ndd\PYZus{}003}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Trello ref: NDD\PYZhy{}003: Séparer les lignes combinées}
-        \PY{c+cm}{ }\PY{c+cm}{*/}
-        \PY{k}{DROP} \PY{k}{TRIGGER} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{trigger\PYZus{}ndd\PYZus{}003} \PY{k}{ON} \PY{n}{CorrectionTemp}\PY{p}{;}
-        \PY{k}{CREATE} \PY{k}{TRIGGER} \PY{n}{trigger\PYZus{}ndd\PYZus{}003}
-            \PY{k}{BEFORE} \PY{k}{INSERT} \PY{k}{ON} \PY{n}{CorrectionTemp}
-            \PY{k}{FOR} \PY{k}{EACH} \PY{k}{ROW}
-                \PY{k}{EXECUTE} \PY{k}{PROCEDURE} \PY{n}{separer\PYZus{}ligne\PYZus{}combinees}\PY{p}{(}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-NOTICE:  trigger "trigger\_ndd\_003" for relation "correctiontemp" does not exist,
-skipping
-
-    \end{Verbatim}
-
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{k}{COPY} \PY{n}{CorrectionTemp}\PY{p}{(} \PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{Serie}\PY{p}{,} \PY{n}{Article}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{,} \PY{n}{Ville}\PY{p}{,} \PY{n}{Sujet}\PY{p}{,}
-        \PY{n}{DescDet}\PY{p}{,} \PY{n+nb}{Date}\PY{p}{,} \PY{n}{Notebp}\PY{p}{,} \PY{n}{FicNum}\PY{p}{,} \PY{n}{Idx\PYZus{}Ico}\PY{p}{,} \PY{n}{NbrCli}\PY{p}{,} \PY{n}{TailleCli}\PY{p}{,} \PY{n}{Taille}\PY{p}{,} \PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{Remarques} \PY{p}{)}
-        \PY{k}{FROM} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/data.csv}\PY{l+s+s1}{\PYZsq{}} \PY{k}{DELIMITER} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{     }\PY{l+s+s1}{\PYZsq{}} \PY{k}{CSV} \PY{k}{HEADER}\PY{p}{;}
-        \PY{c+c1}{\PYZhy{}\PYZhy{}DROP TABLE IF EXISTS CorrectionTemp;}
-        \PY{c+c1}{\PYZhy{}\PYZhy{}SELECT * FROM Correction LIMIT 10;}
-\end{Verbatim}
-
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{k}{COPY} \PY{n}{Correction} \PY{k}{TO} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/separated\PYZus{}data.csv}\PY{l+s+s1}{\PYZsq{}}
-        \PY{k}{DELIMITER} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{     }\PY{l+s+s1}{\PYZsq{}} \PY{k}{CSV} \PY{k}{HEADER}\PY{p}{;}
-\end{Verbatim}
-\end{comment}
     \hypertarget{les-cantons-associuxe9s-aux-communes}{%
 \subsection{Les Cantons associés aux
 communes}\label{les-cantons-associuxe9s-aux-communes}}
@@ -690,24 +762,666 @@ et LambertY. - on crée une nouvelle table Villes qui contiendra les noms
 ainsi que les coordonnées Lambert de chaque ville. - on update notre
 table pour insérer les coordonnées.
 
-\hypertarget{conclusion}{%
-\subsection{Conclusion:}\label{conclusion}}
-
-Pour résumer, le prétraitement se divise en sous-tâches, exécutées dans
-l'ordre suivant: \\
-$\>$- Créer deux tables: \\
-$\>$- Une table pour accueillir les données brutes \\
-$\>$- Une table pour accueillir les données traitées
-$\>$- Séparer les lignes combinées:\\
-$\>$- Éliminer des incohérences (regexp + fonctions)\\
-$\>$- Transférer les données dans la bonne table (INSERT)\\ 
-$\>$- Compléter les informations - Suppression des informations insignifiantes\\
-$\>$- Ajouter les coordonnées\\
-
    \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor} }]:} 
+{\color{incolor}In [{\color{incolor}4}]:} \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TRIGGER: trigger\PYZus{}pretraitement}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ PROCEDURE: pretraitement}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{pretraitement}\PY{p}{(}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{k}{TRIGGER} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{ReferenceCindocVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{DiscriminantVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{VilleVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{SujetVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{DateVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{NoteBPVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{Idx\PYZus{}PerVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{FicNumVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{Idx\PYZus{}IcoVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{NbrCliVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{TailleCliVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{N\PYZus{}VVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{C\PYZus{}GVals} \PY{n}{insert\PYZus{}array}\PY{p}{;}
+                \PY{n}{CoordVals} \PY{n}{CoordLambert93}\PY{p}{[}\PY{p}{]}\PY{p}{;}
+        
+                \PY{n}{maxLength} \PY{n+nb}{int}\PY{p}{;}
+                \PY{n}{insertVals} \PY{n}{insert\PYZus{}array}\PY{p}{[}\PY{p}{]}\PY{p}{;}
+        
+            \PY{k}{BEGIN}
+                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+                \PY{c+c1}{\PYZhy{}\PYZhy{} Traitement des données}
+                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+                \PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Discriminant}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{pretty}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+                \PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{sujet}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{DateVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}date}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n+nb}{Date}\PY{p}{)}\PY{p}{;}
+                \PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NoteBP}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}
+                    \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{FicNum}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{(.*)\PYZbs{}.(.*)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{Idx\PYZus{}PerVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}oeuvre}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}per}\PY{p}{)}\PY{p}{;}
+                \PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}\PY{n}{lower}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}ico}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{unnest}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{a}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)} \PY{k}{FROM}
+        \PY{n}{unnest}\PY{p}{(}\PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{)} \PY{n}{a}\PY{p}{)}\PY{p}{;}
+                \PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NbrCli}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}cliche}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{TailleCli}\PY{p}{)}\PY{p}{;}
+                \PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}n\PYZus{}v}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{n\PYZus{}v}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+                \PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}c\PYZus{}g}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{c\PYZus{}g}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+                \PY{n}{CoordVals} \PY{o}{:=} \PY{n}{traitement\PYZus{}coord}\PY{p}{(}\PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{)}\PY{p}{;}
+        
+                \PY{n}{maxLength} \PY{o}{:=} \PY{n}{getMaxLength}\PY{p}{(}
+                        \PY{n}{ReferenceCindocVals}\PY{p}{,}
+                        \PY{n}{DiscriminantVals}\PY{p}{,}
+                        \PY{n}{VilleVals}\PY{p}{,}
+                        \PY{n}{SujetVals}\PY{p}{,}
+                        \PY{n}{DateVals}\PY{p}{,}
+                        \PY{n}{NoteBPVals}\PY{p}{,}
+                        \PY{n}{Idx\PYZus{}PerVals}\PY{p}{,}
+                        \PY{n}{FicNumVals}\PY{p}{,}
+                        \PY{n}{Idx\PYZus{}IcoVals}\PY{p}{,}
+                        \PY{n}{NbrCliVals}\PY{p}{,}
+                        \PY{n}{TailleCliVals}\PY{p}{,}
+                        \PY{n}{N\PYZus{}VVals}\PY{p}{,}
+                        \PY{n}{C\PYZus{}GVals}
+                \PY{p}{)}\PY{p}{;}
+        
+                \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,} \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+                \PY{c+c1}{\PYZhy{}\PYZhy{} Insérer dans la bonne table les données séparées}
+                \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+                \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Correction} \PY{p}{(}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{Serie}\PY{p}{,} \PY{n}{Article}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{,} \PY{n}{Ville}\PY{p}{,}
+                        \PY{n}{Sujet}\PY{p}{,} \PY{n}{DescDet}\PY{p}{,} \PY{n+nb}{Date}\PY{p}{,} \PY{n}{NoteBP}\PY{p}{,} \PY{n}{Idx\PYZus{}Per}\PY{p}{,} \PY{n}{FicNum}\PY{p}{,} \PY{n}{Idx\PYZus{}Ico}\PY{p}{,} \PY{n}{NbrCli}\PY{p}{,}
+                        \PY{n}{TailleCli}\PY{p}{,} \PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{Remarques}\PY{p}{,} \PY{n}{Coordonnees}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{n}{unnest}\PY{p}{(}
+                            \PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{o}{::}\PY{n+nb}{int}\PY{p}{[}\PY{p}{]}
+                        \PY{p}{)}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{serie}\PY{p}{,}
+                        \PY{k}{cast}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{article} \PY{k}{as} \PY{n+nb}{int}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{traitement\PYZus{}discriminant}\PY{p}{(}
+                            \PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+                        \PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{DescDet}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{DateVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{DateVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{Idx\PYZus{}PerVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{Idx\PYZus{}PerVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{FicNumVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{Idx\PYZus{}IcoVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{NbrCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{TailleCliVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{N\PYZus{}VVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{pretty}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{C\PYZus{}GVals}\PY{l+m+mf}{.}\PY{n}{field}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Remarques}\PY{p}{,}
+                        \PY{n}{unnest}\PY{p}{(}\PY{n}{array\PYZus{}expand}\PY{p}{(}\PY{n}{CoordVals}\PY{p}{,} \PY{n}{maxLength}\PY{p}{,}
+        \PY{n}{CoordVals}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{o}{::}\PY{n}{CoordLambert93}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+                    \PY{p}{)}\PY{p}{;}
+                \PY{k}{RETURN} \PY{k}{NULL}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{k}{DROP} \PY{k}{TRIGGER} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{trigger\PYZus{}pretraitement} \PY{k}{ON} \PY{n}{CorrectionTemp}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{TRIGGER} \PY{n}{trigger\PYZus{}pretraitement}
+            \PY{k}{BEFORE} \PY{k}{INSERT} \PY{k}{ON} \PY{n}{CorrectionTemp}
+            \PY{k}{FOR} \PY{k}{EACH} \PY{k}{ROW}
+                \PY{k}{EXECUTE} \PY{k}{PROCEDURE} \PY{n}{pretraitement}\PY{p}{(}\PY{p}{)}\PY{p}{;}
 \end{Verbatim}
 
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+NOTICE:  trigger "trigger\_pretraitement" for relation "correctiontemp" does not exist,
+skipping
+
+    \end{Verbatim}
+
+    \hypertarget{normalisation-de-la-base-de-donnuxe9es}{%
+\section{Normalisation de la base de
+données}\label{normalisation-de-la-base-de-donnuxe9es}}
+
+Comme nous avons demontré dans ce \href{docs/schema.pdf}{document}, il
+est préférable que la base soit en 3FN, c'est à dire structurée comme
+ci: \includegraphics{pdfsrc/EntityRelationshipDiagram.png}
+
+Nous allons créer une trigger qui, avant d'insérer dans la table
+correction, distribue les données dans la bonne tables. Les procédés
+sont similaires à ceux réalisé précédemment.
+
+\hypertarget{cruxe9ation-des-tables-receptrices}{%
+\subsection{Création des tables
+receptrices:}\label{cruxe9ation-des-tables-receptrices}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{k}{Document}\PY{p}{,} \PY{n}{Photo}\PY{p}{,} \PY{n}{Sujet}\PY{p}{,} \PY{n}{IndexIconographique}\PY{p}{,} \PY{n}{Cliche}\PY{p}{,} \PY{n}{TypeOeuvre}\PY{p}{,}
+        \PY{n}{IndexPersonne}\PY{p}{,} \PY{n}{DatePhoto}\PY{p}{,} \PY{n}{Serie}\PY{p}{,} \PY{n}{Ville} \PY{k}{CASCADE}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Ville}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Ville}\PY{p}{(}
+            \PY{n}{idVille} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{NomVille} \PY{n+nb}{varchar} \PY{k}{UNIQUE}\PY{p}{,}
+            \PY{n}{CoordX} \PY{n+nb}{numeric} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{CoordY} \PY{n+nb}{numeric} \PY{k}{NULL}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Ville} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}ville} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idVille}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Serie}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Serie}\PY{p}{(}
+            \PY{n}{idSerie} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{NomSerie} \PY{n+nb}{varchar} \PY{k}{UNIQUE}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Serie} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}serie} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idSerie}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: DatePhoto}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{DatePhoto}\PY{p}{(}
+            \PY{n}{idDate} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{DateJour} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{2}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{DateMois} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{2}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{DateAnnee} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{4}\PY{p}{)} \PY{k}{NOT} \PY{k}{NULL}\PY{p}{,}
+            \PY{k}{UNIQUE}\PY{p}{(}\PY{n}{DateJour}\PY{p}{,}\PY{n}{DateMois}\PY{p}{,} \PY{n}{DateAnnee}\PY{p}{)}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{DatePhoto} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}datephoto} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idDate}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: IndexPersonne, TypeOeuvre}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{TypeOeuvre}\PY{p}{(}
+            \PY{n}{idType} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{NomType} \PY{n+nb}{varchar} \PY{k}{UNIQUE}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{TypeOeuvre} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}typeOeuvre} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idType}\PY{p}{)}\PY{p}{;}
+        \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{TypeOeuvre} \PY{p}{(}\PY{n}{idType}\PY{p}{,} \PY{n}{NomType}\PY{p}{)} \PY{k}{VAlUES} \PY{p}{(}\PY{l+m+mf}{0}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{IndexPersonne}\PY{p}{(}
+            \PY{n}{idOeuvre} \PY{n+nb}{integer} \PY{p}{,}
+            \PY{n}{NomOeuvre} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{n}{TypeOeuvre} \PY{n+nb}{varchar}\PY{p}{,}
+            \PY{k}{UNIQUE}\PY{p}{(}\PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{TypeOeuvre}\PY{p}{)}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{IndexPersonne} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}IndexPers} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idOeuvre}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{IndexPersonne} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}typeOeuvre} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{TypeOeuvre}\PY{p}{)}
+        \PY{k}{REFERENCES} \PY{n}{TypeOeuvre}\PY{p}{(}\PY{n}{idType}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Cliche}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Cliche}\PY{p}{(}
+             \PY{n}{idCliche} \PY{n+nb}{integer} \PY{p}{,}
+             \PY{n}{Taille} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{15}\PY{p}{)} \PY{k}{UNIQUE}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Cliche} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}cliche} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idCliche}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: IndexIconographique}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{IndexIconographique}\PY{p}{(}
+             \PY{n}{idIco} \PY{n+nb}{integer} \PY{p}{,}
+             \PY{n}{Idx\PYZus{}Ico} \PY{n+nb}{varchar} \PY{k}{UNIQUE}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{IndexIconographique} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}indexico} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idIco}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Sujet}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Sujet}\PY{p}{(}
+             \PY{n}{idSujet} \PY{n+nb}{integer} \PY{p}{,}
+             \PY{n}{DescSujet} \PY{n+nb}{varchar} \PY{k}{UNIQUE}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Sujet} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}sujet} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{idSujet}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Photo}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{n}{Photo}\PY{p}{(}
+            \PY{n}{Article} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{Remarques} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{NbrCli} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{DescDet} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idSerie} \PY{n+nb}{integer}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Photo} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}photo} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{Article}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{n}{Photo} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}photo\PYZus{}serie} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idSerie}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{Serie}\PY{p}{(}\PY{n}{idSerie}\PY{p}{)}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TABLE: Document}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{TABLE} \PY{k}{Document}\PY{p}{(}
+            \PY{n}{PhotoArticle} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{Discriminant} \PY{n+nb}{integer}\PY{p}{,}
+            \PY{n}{FicNum} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{28}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{NoteBP} \PY{n+nb}{varchar} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{ReferenceCindoc} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{6}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{N\PYZus{}V} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{3}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{C\PYZus{}G} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{3}\PY{p}{)} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idVille} \PY{n+nb}{integer} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idDate} \PY{n+nb}{integer} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idOeuvre} \PY{n+nb}{integer} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idSujet} \PY{n+nb}{integer} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idIco} \PY{n+nb}{integer} \PY{k}{NULL}\PY{p}{,}
+            \PY{n}{idCliche} \PY{n+nb}{integer} \PY{k}{NULL}
+        \PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{pk\PYZus{}document} \PY{k}{PRIMARY} \PY{k}{KEY}\PY{p}{(}\PY{n}{PhotoArticle}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}photo} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{PhotoArticle}\PY{p}{)}
+        \PY{k}{REFERENCES} \PY{n}{Photo}\PY{p}{(}\PY{n}{Article}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}ville} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idVille}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{Ville}\PY{p}{(}\PY{n}{idVille}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}date} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idDate}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{DatePhoto}\PY{p}{(}\PY{n}{idDate}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}oeuvre} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idOeuvre}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{IndexPersonne}\PY{p}{(}\PY{n}{idOeuvre}\PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}sujet} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idSujet}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{Sujet}\PY{p}{(}\PY{n}{idSujet}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}idxico} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idIco}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{IndexIconographique}\PY{p}{(}\PY{n}{idIco}\PY{p}{)}\PY{p}{;}
+        \PY{k}{ALTER} \PY{k}{TABLE} \PY{k}{Document} \PY{k}{ADD} \PY{k}{CONSTRAINT} \PY{n}{fk\PYZus{}document\PYZus{}cliche} \PY{k}{FOREIGN} \PY{k}{KEY}\PY{p}{(}\PY{n}{idCliche}\PY{p}{)} \PY{k}{REFERENCES}
+        \PY{n}{Cliche}\PY{p}{(}\PY{n}{idCliche}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+
+    \hypertarget{insertion-des-donnuxe9es-dans-les-tables}{%
+\subsection{Insertion des données dans les
+tables}\label{insertion-des-donnuxe9es-dans-les-tables}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{c+cm}{/*}\PY{c+cm}{ ========================================}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FONCTIONS UTILES}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Description:}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ ========================================}\PY{c+cm}{*/}
+        
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{month\PYZus{}to\PYZus{}num}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{month\PYZus{}to\PYZus{}num}\PY{p}{(}\PY{n}{mois} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{2}\PY{p}{)}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{numeric}\PY{p}{(}\PY{l+m+mf}{2}\PY{p}{)} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Janvier}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{1}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Février}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{2}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mars}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{3}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Avril}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{4}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mai}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{5}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Juin}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{6}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Jui\PYZob{}0,1\PYZcb{}llet}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{7}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Août}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{8}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Septembre}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{9}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Octobre}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{10}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Novembre}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{11}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{mois} \PY{k}{ILIKE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Décembre}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+m+mf}{12}\PY{p}{;}
+                \PY{k}{ELSE} \PY{k}{RETURN} \PY{o}{\PYZhy{}}\PY{l+m+mf}{1}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{num\PYZus{}to\PYZus{}month}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{num\PYZus{}to\PYZus{}month}\PY{p}{(}\PY{n}{num} \PY{n+nb}{varchar}\PY{p}{(}\PY{l+m+mf}{2}\PY{p}{)}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Janvier}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Février}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{3}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mars}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{4}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Avril}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{5}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mai}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{6}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Juin}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{7}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Juillet}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{8}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Août}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{9}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Septembre}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{10}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Octobre}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{11}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Novembre}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{num} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{12}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Décembre}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{ELSE} \PY{k}{RETURN} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{c+c1}{\PYZhy{}\PYZhy{} combine\PYZus{}date\PYZus{}string: combiner les colonnes dans DatePhoto}
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{combine\PYZus{}date\PYZus{}string}\PY{p}{(}\PY{n}{d} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{res} \PY{n+nb}{varchar}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{d}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN} \PY{n}{d}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+                \PY{n}{res} \PY{o}{:=} \PY{n}{array\PYZus{}to\PYZus{}string}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{[}\PY{n}{d}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{,} \PY{n}{num\PYZus{}to\PYZus{}month}\PY{p}{(}\PY{n}{d}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{d}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]}\PY{p}{]}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{res} \PY{o}{:=} \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{res}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZca{}\PYZbs{}s*(.*)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{k}{RETURN} \PY{k}{trim}\PY{p}{(}\PY{k}{BOTH} \PY{k}{from} \PY{n}{res}\PY{p}{)}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{c+c1}{\PYZhy{}\PYZhy{} split\PYZus{}date: séparer NEW.Date en 3 colonnes}
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{split\PYZus{}date}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{split\PYZus{}date}\PY{p}{(}\PY{n}{str} \PY{n+nb}{varchar}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{res} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{o}{=} \PY{k}{ARRAY}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{;}
+                \PY{n}{arr} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{length} \PY{n+nb}{integer} \PY{o}{:=} \PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{arr}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{;}
+            \PY{k}{BEGIN}
+        
+                \PY{k}{IF} \PY{p}{(}\PY{n}{str} \PY{k}{IS} \PY{k}{NULL}\PY{p}{)} \PY{k}{or} \PY{p}{(}\PY{n}{char\PYZus{}length}\PY{p}{(}\PY{n}{str}\PY{p}{)} \PY{o}{=} \PY{l+m+mf}{0}\PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{RETURN} \PY{k}{NULL}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{k}{IF} \PY{n}{length} \PY{o}{=} \PY{l+m+mf}{1} \PY{k}{THEN} \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]} \PY{o}{:=} \PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{length} \PY{o}{=} \PY{l+m+mf}{2} \PY{k}{THEN}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{n}{month\PYZus{}to\PYZus{}num}\PY{p}{(}\PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]} \PY{o}{:=} \PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{;}
+                \PY{k}{ELSE}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{o}{:=} \PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{n}{month\PYZus{}to\PYZus{}num}\PY{p}{(}\PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{)}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]} \PY{o}{:=} \PY{n}{arr}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{k}{RETURN} \PY{n}{res}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{c+c1}{\PYZhy{}\PYZhy{} split\PYZus{}oeuvre: séparer NEW.Idx\PYZus{}per en nom et type}
+        \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
+        \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{split\PYZus{}oeuvre}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{split\PYZus{}oeuvre}\PY{p}{(}\PY{n}{str} \PY{n+nb}{varchar}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{res} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{o}{=} \PY{k}{ARRAY}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{::}\PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{;}
+            \PY{k}{BEGIN}
+        
+                \PY{k}{IF} \PY{n}{str} \PY{o}{\PYZti{}*} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.*,\PYZbs{}s([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZdl{})}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN}
+                    \PY{n}{str} \PY{o}{:=} \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{(.*),\PYZbs{}s([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZdl{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1|\PYZbs{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{o}{:=} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{2}\PY{p}{)}\PY{p}{;}
+                \PY{k}{ELSIF} \PY{n}{str} \PY{o}{\PYZti{}*} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZca{}([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*,(?:\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*))\PYZbs{}(([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+)\PYZbs{})}\PY{l+s+s1}{\PYZsq{}}
+        \PY{k}{THEN}
+                    \PY{n}{str} \PY{o}{:=} \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{str}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZca{}([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*,(?:\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*))\PYZbs{}(([A\PYZhy{}zÀ\PYZhy{}ÿ]+\PYZbs{}s*[A\PYZhy{}zÀ\PYZhy{}ÿ]+)\PYZbs{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}1|\PYZbs{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{o}{:=} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{;}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{n}{split\PYZus{}part}\PY{p}{(}\PY{n}{str}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mf}{2}\PY{p}{)}\PY{p}{;}
+                \PY{k}{ELSE}
+                    \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{o}{:=} \PY{n}{str}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{o}{:=} \PY{k}{trim}\PY{p}{(}\PY{k}{BOTH} \PY{k}{from} \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+                \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{:=} \PY{k}{trim}\PY{p}{(}\PY{k}{BOTH} \PY{k}{from} \PY{n}{res}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+        
+                \PY{k}{RETURN} \PY{n}{res}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{c+cm}{/*}\PY{c+cm}{*}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ TRIGGER: trigger\PYZus{}normalisation}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ PROCEDURE: normalisation}
+        \PY{c+cm}{ }\PY{c+cm}{*/}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{normalisation}\PY{p}{(}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{k}{TRIGGER} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{v\PYZus{}idVille} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idSerie} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idDate} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}date} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]} \PY{o}{:=} \PY{n}{split\PYZus{}date}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n+nb}{Date}\PY{p}{)}\PY{p}{;}
+                \PY{n}{v\PYZus{}idOeuvre} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idCliche} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idSujet} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idIco} \PY{n+nb}{integer}\PY{p}{;}
+                \PY{n}{v\PYZus{}idxPer} \PY{n+nb}{varchar}\PY{p}{[}\PY{p}{]}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans Ville}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idVille} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idVille}\PY{p}{)} \PY{k}{FROM} \PY{n}{Ville}\PY{p}{;}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Ville}\PY{p}{(}\PY{n}{idVille}\PY{p}{,} \PY{n}{NomVille}\PY{p}{,} \PY{n}{CoordX}\PY{p}{,} \PY{n}{CoordY}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idVille}\PY{p}{)} \PY{k}{FROM} \PY{n}{Ville}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Coordonnees}\PY{p}{)}\PY{l+m+mf}{.}\PY{n}{CoordX}\PY{p}{,} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Coordonnees}\PY{p}{)}\PY{l+m+mf}{.}\PY{n}{CoordY}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT}\PY{p}{(}\PY{n}{NomVille}\PY{p}{)} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+        
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans serie;}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Serie} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Serie}\PY{p}{(}\PY{n}{idSerie}\PY{p}{,} \PY{n}{NomSerie}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idSerie}\PY{p}{)} \PY{k}{FROM} \PY{n}{Serie}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Serie}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT}\PY{p}{(}\PY{n}{NomSerie}\PY{p}{)} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans date;}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL}\PY{p}{)} \PY{k}{THEN}
+                    \PY{c+c1}{\PYZhy{}\PYZhy{}RAISE EXCEPTION \PYZsq{}Inserting \PYZpc{} from \PYZpc{}\PYZsq{}, v\PYZus{}date, NEW.Date;}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{DatePhoto}\PY{p}{(}\PY{n}{idDate}\PY{p}{,} \PY{n}{DateJour}\PY{p}{,} \PY{n}{DateMois}\PY{p}{,} \PY{n}{DateAnnee}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idDate}\PY{p}{)} \PY{k}{FROM} \PY{n}{DatePhoto}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{,} \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{,} \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT}\PY{p}{(}\PY{n}{DateJour}\PY{p}{,} \PY{n}{DateMois}\PY{p}{,} \PY{n}{DateAnnee}\PY{p}{)} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans IdxPers;}
+                \PY{n}{v\PYZus{}idxPer} \PY{o}{:=} \PY{n}{split\PYZus{}oeuvre}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{idx\PYZus{}per}\PY{p}{)}\PY{p}{;}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}per} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{IF} \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{o}{!=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}} \PY{k}{THEN}
+                        \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{TypeOeuvre}\PY{p}{(}\PY{n}{idType}\PY{p}{,} \PY{n}{NomType}\PY{p}{)}
+                        \PY{k}{VALUES}\PY{p}{(}
+                            \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idType}\PY{p}{)} \PY{k}{FROM} \PY{n}{TypeOeuvre}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}
+                        \PY{p}{)} \PY{k}{ON} \PY{n}{CONFLICT}\PY{p}{(}\PY{n}{NomType}\PY{p}{)} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{IndexPersonne}\PY{p}{(}\PY{n}{idOeuvre}\PY{p}{,} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{TypeOeuvre}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idOeuvre}\PY{p}{)} \PY{k}{FROM} \PY{n}{IndexPersonne}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]}\PY{p}{,}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{idType} \PY{k}{FROM} \PY{n}{TypeOeuvre} \PY{k}{WHERE} \PY{n}{NomType} \PY{o}{=} \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]}\PY{p}{)}
+                    \PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT}\PY{p}{(}\PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{TypeOeuvre}\PY{p}{)} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans Cliche}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{TailleCli} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Cliche}\PY{p}{(}\PY{n}{idCliche}\PY{p}{,} \PY{n}{Taille}\PY{p}{)}
+                    \PY{k}{VALUES} \PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idCliche}\PY{p}{)} \PY{k}{FROM} \PY{n}{Cliche}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{TailleCli}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans IndexIco}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}Ico} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{IndexIconographique}\PY{p}{(}\PY{n}{idIco}\PY{p}{,} \PY{n}{Idx\PYZus{}Ico}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idIco}\PY{p}{)} \PY{k}{FROM} \PY{n}{IndexIconographique}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}Ico}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans Sujet}
+                \PY{k}{IF} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Sujet} \PY{k}{IS} \PY{k}{NOT} \PY{k}{NULL} \PY{p}{)} \PY{k}{THEN}
+                    \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Sujet}\PY{p}{(}\PY{n}{idSujet}\PY{p}{,} \PY{n}{DescSujet}\PY{p}{)}
+                    \PY{k}{VALUES}\PY{p}{(}
+                        \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{idSujet}\PY{p}{)} \PY{k}{FROM} \PY{n}{Sujet}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{1}\PY{p}{,}
+                        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Sujet}\PY{p}{)}
+                    \PY{k}{ON} \PY{n}{CONFLICT} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans Photo;}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idSerie} \PY{n}{idSerie} \PY{k}{FROM} \PY{n}{Serie} \PY{k}{WHERE} \PY{n}{NomSerie} \PY{o}{=} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Serie}\PY{p}{;}
+                \PY{k}{INSERT} \PY{k}{INTO} \PY{n}{Photo} \PY{p}{(}\PY{n}{Article}\PY{p}{,} \PY{n}{Remarques}\PY{p}{,} \PY{n}{NbrCli}\PY{p}{,} \PY{n}{DescDet}\PY{p}{,} \PY{n}{idSerie}\PY{p}{)}
+                \PY{k}{VALUES} \PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Article}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Remarques}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NbrCli}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{DescDet}\PY{p}{,} \PY{n}{v\PYZus{}idSerie}\PY{p}{)}
+                \PY{k}{ON} \PY{n}{CONFLICT} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+        
+                \PY{c+c1}{\PYZhy{}\PYZhy{} INSERT dans Document}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idVille} \PY{n}{idVille} \PY{k}{FROM} \PY{n}{Ville} \PY{k}{WHERE} \PY{n}{NomVille} \PY{o}{=} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{;}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idDate} \PY{n}{idDate} \PY{k}{FROM} \PY{n}{DatePhoto}
+                    \PY{k}{WHERE} \PY{n}{DateJour} \PY{o}{=} \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{k}{and} \PY{n}{DateMois} \PY{o}{=} \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{k}{and} \PY{n}{DateAnnee} \PY{o}{=}
+        \PY{n}{v\PYZus{}date}\PY{p}{[}\PY{l+m+mf}{3}\PY{p}{]}\PY{p}{;}
+        
+        
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idOeuvre} \PY{n}{idOeuvre} \PY{k}{FROM} \PY{n}{IndexPersonne} \PY{n}{i}\PY{p}{,} \PY{n}{TypeOeuvre} \PY{n}{t}
+                \PY{k}{WHERE} \PY{n}{NomOeuvre} \PY{o}{=} \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{1}\PY{p}{]} \PY{k}{and} \PY{n}{NomType} \PY{o}{=} \PY{n}{v\PYZus{}idxPer}\PY{p}{[}\PY{l+m+mf}{2}\PY{p}{]} \PY{k}{and} \PY{n}{i}\PY{l+m+mf}{.}\PY{n}{TypeOeuvre} \PY{o}{=}
+        \PY{n}{t}\PY{l+m+mf}{.}\PY{n}{idType}\PY{p}{;}
+        
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idCliche} \PY{n}{idCliche} \PY{k}{FROM} \PY{n}{Cliche} \PY{k}{WHERE} \PY{n}{Taille} \PY{o}{=} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{TailleCli}\PY{p}{;}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idIco} \PY{n}{idIco} \PY{k}{FROM} \PY{n}{IndexIconographique} \PY{k}{WHERE} \PY{n}{Idx\PYZus{}Ico} \PY{o}{=} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Idx\PYZus{}Ico}\PY{p}{;}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{v\PYZus{}idSujet} \PY{n}{idSujet} \PY{k}{FROM} \PY{n}{Sujet} \PY{k}{WHERE} \PY{n}{DescSujet} \PY{o}{=} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Sujet}\PY{p}{;}
+        
+                \PY{k}{INSERT} \PY{k}{INTO} \PY{k}{Document}\PY{p}{(}\PY{n}{PhotoArticle}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{,} \PY{n}{FicNum}\PY{p}{,} \PY{n}{NoteBP}\PY{p}{,}
+        \PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{idVille}\PY{p}{,} \PY{n}{idOeuvre}\PY{p}{,} \PY{n}{idDate}\PY{p}{,} \PY{n}{idCliche}\PY{p}{,} \PY{n}{idIco}\PY{p}{,} \PY{n}{idSujet}\PY{p}{)}
+                \PY{k}{VALUES}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Article}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Discriminant}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{FicNum}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NoteBP}\PY{p}{,}
+        \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{v\PYZus{}idVille}\PY{p}{,} \PY{n}{v\PYZus{}idOeuvre}\PY{p}{,} \PY{n}{v\PYZus{}idDate}\PY{p}{,} \PY{n}{v\PYZus{}idCliche}\PY{p}{,}
+        \PY{n}{v\PYZus{}idIco}\PY{p}{,} \PY{n}{v\PYZus{}idSujet}\PY{p}{)}
+                \PY{k}{ON} \PY{n}{CONFLICT} \PY{k}{DO} \PY{k}{NOTHING}\PY{p}{;}
+        
+                \PY{k}{RETURN} \PY{k}{NULL}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{LANGUAGE} \PY{n}{plpgsql}\PY{p}{;}
+        
+        \PY{k}{DROP} \PY{k}{TRIGGER} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{trigger\PYZus{}normalisation} \PY{k}{ON} \PY{n}{Correction}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{TRIGGER} \PY{n}{trigger\PYZus{}normalisation}
+            \PY{k}{BEFORE} \PY{k}{INSERT} \PY{k}{ON} \PY{n}{Correction}
+            \PY{k}{FOR} \PY{k}{EACH} \PY{k}{ROW}
+                \PY{k}{EXECUTE} \PY{k}{PROCEDURE} \PY{n}{normalisation}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+NOTICE:  trigger "trigger\_normalisation" for relation "correction" does not exist,
+skipping
+
+    \end{Verbatim}
+
+    \hypertarget{vuxe9rifier-si-on-a-des-donnuxe9es-perdues.}{%
+\subsection{Vérifier si on a des données
+perdues.}\label{vuxe9rifier-si-on-a-des-donnuxe9es-perdues.}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{verifier\PYZus{}normalisation}\PY{p}{(}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{bool} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{bVille} \PY{n+nb}{bool}\PY{p}{;}
+                \PY{n}{bIndexPersonne} \PY{n+nb}{bool}\PY{p}{;}
+                \PY{n}{bDate} \PY{n+nb}{bool}\PY{p}{;}
+                \PY{n}{bSujet} \PY{n+nb}{bool}\PY{p}{;}
+                \PY{n}{bCliche} \PY{n+nb}{bool}\PY{p}{;}
+                \PY{n}{bIco} \PY{n+nb}{bool}\PY{p}{;}
+        
+                \PY{n}{nbVilleDoc} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idVille}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbVille} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idVille}\PY{p}{)} \PY{k}{FROM} \PY{n}{Ville}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbOeuvreDoc} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idOeuvre}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbOeuvre} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idOeuvre}\PY{p}{)} \PY{k}{FROM} \PY{n}{IndexPersonne}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbDateDoc} \PY{n+nb}{integer}\PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idDate}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbDate} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idDate}\PY{p}{)} \PY{k}{FROM} \PY{n}{DatePhoto}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbSujetDoc} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idSujet}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbSujet} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idSujet}\PY{p}{)} \PY{k}{FROM} \PY{n}{Sujet}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbClicheDoc} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idCliche}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbCliche} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idCliche}\PY{p}{)} \PY{k}{FROM} \PY{n}{Cliche}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbIdoDoc} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idIco}\PY{p}{)} \PY{k}{FROM} \PY{k}{Document}\PY{p}{)}\PY{p}{;}
+                \PY{n}{nbIdo} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{idIco}\PY{p}{)} \PY{k}{FROM} \PY{n}{IndexIconographique}\PY{p}{)}\PY{p}{;}
+        
+            \PY{k}{BEGIN}
+                \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{bVille}\PY{p}{,} \PY{n}{bIndexPersonne}\PY{p}{,} \PY{n}{bDate}\PY{p}{,} \PY{n}{bSujet}\PY{p}{,} \PY{n}{bCliche}\PY{p}{,} \PY{n}{bIco}
+                        \PY{p}{(}\PY{n}{nbVilleDoc} \PY{o}{=} \PY{n}{nbVille}\PY{p}{)}\PY{p}{,}
+                        \PY{p}{(}\PY{n}{nbOeuvreDoc} \PY{o}{=} \PY{n}{nbOeuvre}\PY{p}{)}\PY{p}{,}
+                        \PY{p}{(}\PY{n}{nbDateDoc} \PY{o}{=} \PY{n}{nbDate}\PY{p}{)}\PY{p}{,}
+                        \PY{p}{(}\PY{n}{nbSujetDoc} \PY{o}{=} \PY{n}{nbSujet}\PY{p}{)}\PY{p}{,}
+                        \PY{p}{(}\PY{n}{nbClicheDoc} \PY{o}{=} \PY{n}{nbCliche}\PY{p}{)}\PY{p}{,}
+                        \PY{p}{(}\PY{n}{nbIdoDoc} \PY{o}{=} \PY{n}{nbIdo}\PY{p}{)}\PY{p}{;}
+        
+                \PY{k}{IF} \PY{n}{bVille} \PY{k}{and} \PY{n}{bIndexPersonne} \PY{k}{and} \PY{n}{bDate} \PY{k}{and} \PY{n}{bSujet} \PY{k}{and} \PY{n}{bCliche} \PY{k}{and} \PY{n}{bIco} \PY{k}{THEN}
+                    \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{Correction}\PY{p}{;}
+                    \PY{k}{RETURN} \PY{k}{true}\PY{p}{;}
+                \PY{k}{ELSE}
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bVille} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans Ville: actuel(\PYZpc{}) vs attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{nbVilleDoc}\PY{p}{,} \PY{n}{nbVille}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bIndexPersonne} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans IndexPersonne: actuel(\PYZpc{}) vs}
+        \PY{l+s+s1}{attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{nbOeuvreDoc}\PY{p}{,} \PY{n}{nbOeuvre}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bDate} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans Date: actuel(\PYZpc{}) vs attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{nbDateDoc}\PY{p}{,} \PY{n}{nbDate}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bSujet} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans Sujet: actuel(\PYZpc{}) vs attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{nbSujetDoc}\PY{p}{,} \PY{n}{nbSujet}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bCliche} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans Cliche: actuel(\PYZpc{}) vs attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{nbClicheDoc}\PY{p}{,} \PY{n}{nbCliche}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{IF} \PY{k}{not} \PY{n}{bIco} \PY{k}{THEN}
+                        \PY{k}{RAISE} \PY{k}{NOTICE} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Perte de donnée dans IndexIco: actuel(\PYZpc{}) vs attendu(\PYZpc{})}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{nbIdoDoc}\PY{p}{,} \PY{n}{nbIdo}\PY{p}{;}
+                    \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+        
+                    \PY{k}{RETURN} \PY{k}{false}\PY{p}{;}
+                \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+\end{Verbatim}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{k}{COPY} \PY{n}{CorrectionTemp}\PY{p}{(} \PY{n}{ReferenceCindoc}\PY{p}{,} \PY{n}{Serie}\PY{p}{,} \PY{n}{Article}\PY{p}{,} \PY{n}{Discriminant}\PY{p}{,} \PY{n}{Ville}\PY{p}{,} \PY{n}{Sujet}\PY{p}{,}
+        \PY{n}{DescDet}\PY{p}{,} \PY{n+nb}{Date}\PY{p}{,} \PY{n}{Notebp}\PY{p}{,} \PY{n}{Idx\PYZus{}per}\PY{p}{,} \PY{n}{FicNum}\PY{p}{,} \PY{n}{Idx\PYZus{}Ico}\PY{p}{,} \PY{n}{NbrCli}\PY{p}{,} \PY{n}{TailleCli}\PY{p}{,} \PY{n}{N\PYZus{}V}\PY{p}{,} \PY{n}{C\PYZus{}G}\PY{p}{,} \PY{n}{Remarques}
+        \PY{p}{)}
+        \PY{k}{FROM} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/data.csv}\PY{l+s+s1}{\PYZsq{}} \PY{k}{DELIMITER} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{     }\PY{l+s+s1}{\PYZsq{}} \PY{k}{CSV} \PY{k}{HEADER}\PY{p}{;}
+        \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{CorrectionTemp}\PY{p}{;}
+        \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{VilleTemp}\PY{p}{;}
+        
+        \PY{k}{SELECT} \PY{n}{verifier\PYZus{}normalisation}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+1 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{r}
+\toprule
+   verifier\_normalisation \\
+\midrule
+                        1 \\
+\bottomrule
+\end{tabular}
+
+    
 
     % Add a bibliography block to the postdoc
     

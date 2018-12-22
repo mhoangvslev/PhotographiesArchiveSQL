@@ -1,6 +1,10 @@
 
 -- connection: host='localhost' dbname='Photographies' user='postgres' password='postgres'
 
+DROP EXTENSION IF EXISTS btree_gin CASCADE;
+--CREATE EXTENSION pg_trgm;
+CREATE EXTENSION btree_gin;
+
 /**
  * COMPOSITE TYPE: CoordLambert93
  * C'est un type qui contient un array de varchar
@@ -89,7 +93,8 @@ COPY VilleTemp (
  * Optimiser: la requête sur la table ville comme on n'a besoin que de 2 attributs
  * 5 mins -> 28s
  *=============================================*/
-CREATE INDEX Ville_Nom_Coords_Key ON VilleTemp(viVille, viLambertX, viLambertY);
+CREATE INDEX idx_Ville_Nom_Coords ON VilleTemp(viVille, viLambertX, viLambertY);
+CREATE INDEX idx_Ville_Patterns ON VilleTemp USING gin(viVille gin_trgm_ops);
 
 /**
  * COMPOSITE TYPE: insert_array
@@ -184,7 +189,7 @@ RETURNS varchar(3)[] AS $$
         END IF;
         
         FOR i IN 1 .. array_length(strSet, 1) LOOP
-            IF (strSet[i] ~* '.*négatif.*') THEN
+            IF (strSet[i] LIKE '%négatif%') THEN
                 strSet[i] := 'NEG';
             ELSE
                 strSet[i] := 'INV';
@@ -283,7 +288,7 @@ RETURNS varchar(3)[] AS $$
         END IF;
         
         FOR i IN 1 .. array_length(strSet, 1) LOOP
-            IF (strSet[i] ~* '.*nb.*') THEN
+            IF (strSet[i] ILIKE '%nb%') THEN
                 strSet[i] := 'GSC';
             ELSE
                 strSet[i] := 'CLR';
@@ -311,7 +316,7 @@ RETURNS CoordLambert93[] AS $$
         FOR i IN 1..coalesce(array_length(villeArr, 1), 0) LOOP
             SELECT viLambertX, viLambertY INTO CoordX, CoordY
             FROM VilleTemp 
-            WHERE viVille = villeArr[i];
+            WHERE viVille ILIKE villeArr[i];
     
             row.CoordX := CoordX; 
             row.CoordY := CoordY;
@@ -322,6 +327,10 @@ RETURNS CoordLambert93[] AS $$
     END;
 $$ LANGUAGE plpgsql;
 
+/**
+ * FUNCTION: traitement_oeuvre(str)
+ */
+DROP FUNCTION IF EXISTS traitement_oeuvre;
 CREATE OR REPLACE FUNCTION traitement_oeuvre(str varchar)
 RETURNS varchar[] AS $$
     BEGIN
@@ -332,6 +341,18 @@ RETURNS varchar[] AS $$
                            ',\s*(\()', ' \1'
             ), '|', '/'
         );
+    END;
+$$ language plpgsql;
+
+/**
+ * FUNCTION: traitement_cliche(str)
+ */
+DROP FUNCTION IF EXISTS traitement_cliche;
+CREATE OR REPLACE FUNCTION traitement_cliche(str varchar)
+RETURNS varchar[] AS $$
+    BEGIN
+        RETURN string_to_array(
+            regexp_replace(str, '([0-9][0-9]*),([0-9])', '\1.\2', 'g'), ','); 
     END;
 $$ language plpgsql;
 
@@ -376,8 +397,7 @@ RETURNS TRIGGER AS $$
         Idx_IcoVals.field := split_string(lower(NEW.Idx_ico), '|', '/');
         Idx_IcoVals.field := ARRAY(SELECT unnest(string_to_array(a, ',')) FROM unnest(Idx_IcoVals.field) a);
         NbrCliVals.field := split_string(NEW.NbrCli, '|', '/');
-        TailleCliVals.field := split_string(
-            regexp_replace(NEW.TailleCli, '([0-9]),([0-9])', '\1.\2'), ' ', ','); 
+        TailleCliVals.field := traitement_cliche(NEW.TailleCli);
         N_VVals.field := traitement_n_v(string_to_array(NEW.n_v, ','));
         C_GVals.field := traitement_c_g(string_to_array(NEW.c_g, ','));
         CoordVals := traitement_coord(VilleVals.field);
@@ -440,7 +460,7 @@ CREATE TRIGGER trigger_pretraitement
     FOR EACH ROW
         EXECUTE PROCEDURE pretraitement();
 
-DROP TABLE IF EXISTS Document, Photo, Sujet, IndexIconographique, Cliche, /*TypeOeuvre,*/ IndexPersonne, DatePhoto, Serie, Ville;
+DROP TABLE IF EXISTS Document, Photo, Sujet, IndexIconographique, Cliche, TypeOeuvre, IndexPersonne, DatePhoto, Serie, Ville CASCADE;
 
 /* ========================================
  * TABLE: Ville
@@ -480,19 +500,22 @@ ALTER TABLE DatePhoto ADD CONSTRAINT pk_datephoto PRIMARY KEY(idDate);
 /* ========================================
  * TABLE: IndexPersonne, TypeOeuvre
  * Description: 
- * ========================================
+ * ========================================*/
 CREATE TABLE TypeOeuvre(
-    idType integer,
-    NomType varchar
+    idType varchar,
+    NomType varchar UNIQUE
 );
-ALTER TABLE TypeOeuvre ADD CONSTRAINT pk_typeOeuvre PRIMARY KEY(idType);*/
+ALTER TABLE TypeOeuvre ADD CONSTRAINT pk_typeOeuvre PRIMARY KEY(idType);
+INSERT INTO TypeOeuvre (idType, NomType) VAlUES (0, '');
 
 CREATE TABLE IndexPersonne(
     idOeuvre integer ,
-    NomOeuvre varchar UNIQUE
+    NomOeuvre varchar,
+    TypeOeuvre varchar,
+    UNIQUE(NomOeuvre, TypeOeuvre)
 );
 ALTER TABLE IndexPersonne ADD CONSTRAINT pk_IndexPers PRIMARY KEY(idOeuvre);
---ALTER TABLE IndexPersonne ADD CONSTRAINT fk_typeOeuvre FOREIGN KEY(TypeOeuvre) REFERENCES TypeOeuvre(idType);
+ALTER TABLE IndexPersonne ADD CONSTRAINT fk_typeOeuvre FOREIGN KEY(TypeOeuvre) REFERENCES TypeOeuvre(idType);
 
 /* ========================================
  * TABLE: Cliche
@@ -501,7 +524,7 @@ ALTER TABLE IndexPersonne ADD CONSTRAINT pk_IndexPers PRIMARY KEY(idOeuvre);
 
 CREATE TABLE Cliche(
      idCliche integer ,
-     Taille varchar(10) UNIQUE
+     Taille varchar(15) UNIQUE
 );
 ALTER TABLE Cliche ADD CONSTRAINT pk_cliche PRIMARY KEY(idCliche);
 
@@ -535,6 +558,7 @@ CREATE TABLE Photo(
     Article integer,
     Remarques varchar NULL,
     NbrCli varchar NULL,
+    DescDet varchar NULL,
     idSerie integer
 );
 ALTER TABLE Photo ADD CONSTRAINT pk_photo PRIMARY KEY(Article);
@@ -549,7 +573,6 @@ CREATE TABLE Document(
     Discriminant integer,
     FicNum varchar(28) NULL,
     NoteBP varchar NULL,
-    DescDet varchar NULL,
     ReferenceCindoc varchar(6) NULL,
     N_V varchar(3) NULL,
     C_G varchar(3) NULL,
@@ -581,18 +604,18 @@ DROP FUNCTION IF EXISTS month_to_num;
 CREATE OR REPLACE FUNCTION month_to_num(mois varchar(2))
 RETURNS numeric(2) AS $$
     BEGIN
-        IF mois ~* 'Janvier' THEN RETURN 1;
-        ELSIF mois ~* 'Février' THEN RETURN 2;
-        ELSIF mois ~* 'Mars' THEN RETURN 3;
-        ELSIF mois ~* 'Avril' THEN RETURN 4;
-        ELSIF mois ~* 'Mai' THEN RETURN 5;
-        ELSIF mois ~* 'Juin' THEN RETURN 6;
-        ELSIF mois ~* 'Jui{0,1}llet' THEN RETURN 7;
-        ELSIF mois ~* 'Août' THEN RETURN 8;
-        ELSIF mois ~* 'Septembre' THEN RETURN 9;
-        ELSIF mois ~* 'Octobre' THEN RETURN 10;
-        ELSIF mois ~* 'Novembre' THEN RETURN 11;
-        ELSIF mois ~* 'Décembre' THEN RETURN 12;
+        IF mois ILIKE 'Janvier' THEN RETURN 1;
+        ELSIF mois ILIKE 'Février' THEN RETURN 2;
+        ELSIF mois ILIKE 'Mars' THEN RETURN 3;
+        ELSIF mois ILIKE 'Avril' THEN RETURN 4;
+        ELSIF mois ILIKE 'Mai' THEN RETURN 5;
+        ELSIF mois ILIKE 'Juin' THEN RETURN 6;
+        ELSIF mois ILIKE 'Jui{0,1}llet' THEN RETURN 7;
+        ELSIF mois ILIKE 'Août' THEN RETURN 8;
+        ELSIF mois ILIKE 'Septembre' THEN RETURN 9;
+        ELSIF mois ILIKE 'Octobre' THEN RETURN 10;
+        ELSIF mois ILIKE 'Novembre' THEN RETURN 11;
+        ELSIF mois ILIKE 'Décembre' THEN RETURN 12;
         ELSE RETURN -1;
         END IF;
     END;
@@ -665,6 +688,35 @@ RETURNS varchar[] AS $$
     END;
 $$ language plpgsql;
 
+-------------------------------------------------------------
+-- split_oeuvre: séparer NEW.Idx_per en nom et type
+-------------------------------------------------------------
+DROP FUNCTION IF EXISTS split_oeuvre;
+CREATE OR REPLACE FUNCTION split_oeuvre(str varchar)
+RETURNS varchar[] AS $$
+    DECLARE
+        res varchar[] = ARRAY['', '']::varchar[];
+    BEGIN
+    
+        IF str ~* '.*,\s([A-zÀ-ÿ]+\s*[A-zÀ-ÿ]+$)' THEN
+            str := regexp_replace(str, '(.*),\s([A-zÀ-ÿ]+\s*[A-zÀ-ÿ]+$)', '\1|\2');
+            res[1] := split_part(str, '|', 1); 
+            res[2] := split_part(str, '|', 2); 
+        ELSIF str ~* '^([A-zÀ-ÿ]+\s*,(?:\s*[A-zÀ-ÿ]+\s*))\(([A-zÀ-ÿ]+\s*[A-zÀ-ÿ]+)\)' THEN
+            str := regexp_replace(str, '^([A-zÀ-ÿ]+\s*,(?:\s*[A-zÀ-ÿ]+\s*))\(([A-zÀ-ÿ]+\s*[A-zÀ-ÿ]+)\)', '\1|\2');
+            res[1] := split_part(str, '|', 1); 
+            res[2] := split_part(str, '|', 2); 
+        ELSE
+            res[1] := str;
+        END IF;
+        
+        res[1] := trim(BOTH from res[1]);
+        res[2] := trim(BOTH from res[2]);
+                
+        RETURN res;
+    END;
+$$ language plpgsql;
+
 /**
  * TRIGGER: trigger_normalisation
  * PROCEDURE: normalisation
@@ -680,6 +732,7 @@ RETURNS TRIGGER AS $$
         v_idCliche integer;
         v_idSujet integer;
         v_idIco integer;
+        v_idxPer varchar[];
     BEGIN       
         -- INSERT dans Ville
         IF (NEW.Ville IS NOT NULL ) THEN  
@@ -711,17 +764,29 @@ RETURNS TRIGGER AS $$
             ON CONFLICT(DateJour, DateMois, DateAnnee) DO NOTHING;
         END IF;
         
+        
         -- INSERT dans IdxPers;
-        IF (NEW.Idx_per IS NOT NULL ) THEN  
-            INSERT INTO IndexPersonne(idOeuvre, NomOeuvre) 
+        v_idxPer := split_oeuvre(NEW.idx_per);
+        IF (NEW.Idx_per IS NOT NULL ) THEN
+            IF v_idxPer[2] != '' THEN
+                INSERT INTO TypeOeuvre(idType, NomType) 
+                VALUES(
+                    (SELECT COUNT(idType) FROM TypeOeuvre),
+                    v_idxPer[2]
+                ) ON CONFLICT(NomType) DO NOTHING;
+            END IF;
+            
+            INSERT INTO IndexPersonne(idOeuvre, NomOeuvre, TypeOeuvre) 
             VALUES(
                 (SELECT COUNT(idOeuvre) FROM IndexPersonne)+1,
-                NEW.Idx_per) 
-            ON CONFLICT(NomOeuvre) DO NOTHING;    
+                v_idxPer[1],
+                (SELECT idType FROM TypeOeuvre WHERE NomType = v_idxPer[2])
+            ) 
+            ON CONFLICT(NomOeuvre, TypeOeuvre) DO NOTHING;    
         END IF;
         
         -- INSERT dans Cliche
-        IF (NEW.TailleCli IS NOT NULL ) THEN 
+        IF (NEW.TailleCli IS NOT NULL ) THEN                 
             INSERT INTO Cliche(idCliche, Taille) 
             VALUES (
                 (SELECT COUNT(idCliche) FROM Cliche)+1,
@@ -749,8 +814,8 @@ RETURNS TRIGGER AS $$
         
         -- INSERT dans Photo;
         SELECT INTO v_idSerie idSerie FROM Serie WHERE NomSerie = NEW.Serie;
-        INSERT INTO Photo (Article, Remarques, NbrCli, idSerie)
-        VALUES (NEW.Article, NEW.Remarques, NEW.NbrCli, v_idSerie)
+        INSERT INTO Photo (Article, Remarques, NbrCli, DescDet, idSerie)
+        VALUES (NEW.Article, NEW.Remarques, NEW.NbrCli, NEW.DescDet, v_idSerie)
         ON CONFLICT DO NOTHING;
         
         -- INSERT dans Document
@@ -758,20 +823,19 @@ RETURNS TRIGGER AS $$
         SELECT INTO v_idDate idDate FROM DatePhoto 
             WHERE DateJour = v_date[1] and DateMois = v_date[2] and DateAnnee = v_date[3];
             
-        /*IF (v_date[3] = '1962') THEN
-            RAISE NOTICE 'Date (%) not found using (%).', v_idDate, v_date;
-        END IF;*/
         
-        SELECT INTO v_idOeuvre idOeuvre FROM IndexPersonne WHERE NomOeuvre = NEW.Idx_Per;
+        SELECT INTO v_idOeuvre idOeuvre FROM IndexPersonne i, TypeOeuvre t
+        WHERE NomOeuvre = v_idxPer[1] and NomType = v_idxPer[2] and i.TypeOeuvre = t.idType;
+        
         SELECT INTO v_idCliche idCliche FROM Cliche WHERE Taille = NEW.TailleCli;
         SELECT INTO v_idIco idIco FROM IndexIconographique WHERE Idx_Ico = NEW.Idx_Ico; 
-        SELECT INTO v_idSujet idSujet FROM Sujet WHERE DescSujet = NEW.Sujet;   
+        SELECT INTO v_idSujet idSujet FROM Sujet WHERE DescSujet = NEW.Sujet;  
         
-        INSERT INTO Document(PhotoArticle, Discriminant, FicNum, NoteBP, DescDet, ReferenceCindoc, N_V, C_G, idVille, idOeuvre, idDate, idCliche, idIco, idSujet)
-        VALUES(NEW.Article, NEW.Discriminant, NEW.FicNum, NEW.NoteBP, NEW.DescDet, NEW.ReferenceCindoc, NEW.N_V, NEW.C_G, v_idVille, v_idOeuvre, v_idDate, v_idCliche, v_idIco, v_idSujet)
+        INSERT INTO Document(PhotoArticle, Discriminant, FicNum, NoteBP, ReferenceCindoc, N_V, C_G, idVille, idOeuvre, idDate, idCliche, idIco, idSujet)
+        VALUES(NEW.Article, NEW.Discriminant, NEW.FicNum, NEW.NoteBP, NEW.ReferenceCindoc, NEW.N_V, NEW.C_G, v_idVille, v_idOeuvre, v_idDate, v_idCliche, v_idIco, v_idSujet)
         ON CONFLICT DO NOTHING;  
         
-        RETURN NEW;
+        RETURN NULL;
     END;
 $$ LANGUAGE plpgsql;
 
@@ -815,7 +879,7 @@ RETURNS bool AS $$
                 (nbIdoDoc = nbIdo);
                 
         IF bVille and bIndexPersonne and bDate and bSujet and bCliche and bIco THEN
-            --DROP TABLE IF EXISTS Correction;   
+            DROP TABLE IF EXISTS Correction;   
             RETURN true;
         ELSE
             IF not bVille THEN
