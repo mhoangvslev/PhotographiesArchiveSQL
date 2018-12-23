@@ -149,12 +149,7 @@
     \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
     % Document parameters
     % Document title
-    \title{Prétraitement - Normalisation}
-	\author{
-	Amina, KACIMI \and
-	Valentin, DEHAINAULT \and
-	Minh-Hoang DANG
-}
+    \title{pretraitement}
     
     
     
@@ -432,8 +427,9 @@ la vraie table \texttt{Correction}, via une multitude de triggers.
         \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ Optimiser: la requête sur la table ville comme on n\PYZsq{}a besoin que de 2 attributs}
         \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ 5 mins \PYZhy{}\PYZgt{} 28s}
         \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{=============================================}\PY{c+cm}{*/}
-        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}Ville\PYZus{}Nom\PYZus{}Coords} \PY{k}{ON} \PY{n}{VilleTemp}\PY{p}{(}\PY{n}{viVille}\PY{p}{,} \PY{n}{viLambertX}\PY{p}{,} \PY{n}{viLambertY}\PY{p}{)}\PY{p}{;}
-        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}Ville\PYZus{}Patterns} \PY{k}{ON} \PY{n}{VilleTemp} \PY{k}{USING} \PY{n}{gin}\PY{p}{(}\PY{n}{viVille} \PY{n}{gin\PYZus{}trgm\PYZus{}ops}\PY{p}{)}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}ville\PYZus{}nom\PYZus{}cp} \PY{k}{ON} \PY{n}{VilleTemp}\PY{p}{(}\PY{n}{viVille}\PY{p}{,} \PY{n}{viCodePostal}\PY{p}{)}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}ville\PYZus{}cp\PYZus{}coords} \PY{k}{ON} \PY{n}{VilleTemp}\PY{p}{(}\PY{n}{viCodePostal}\PY{p}{,} \PY{n}{viLambertX}\PY{p}{,} \PY{n}{viLambertY}\PY{p}{)}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{INDEX} \PY{n}{idx\PYZus{}ville\PYZus{}patterns} \PY{k}{ON} \PY{n}{VilleTemp} \PY{k}{USING} \PY{n}{gin}\PY{p}{(}\PY{n}{viVille} \PY{n}{gin\PYZus{}trgm\PYZus{}ops}\PY{p}{)}\PY{p}{;}
 \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
@@ -661,8 +657,7 @@ fonctions qui permettent de traiter les données entrantes sous forme de
         
         
         \PY{c+cm}{/*}\PY{c+cm}{*}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}c\PYZus{}g(str)}
-        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{  coulieur = CLR, noir\PYZam{}blanc = GSC (greyscale)}
+        \PY{c+cm}{ }\PY{c+cm}{*}\PY{c+cm}{ FUNCTION: traitement\PYZus{}coord(str)}
         \PY{c+cm}{ }\PY{c+cm}{*/}
         \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{traitement\PYZus{}coord}\PY{p}{;}
         \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{traitement\PYZus{}coord}\PY{p}{(} \PY{n}{villeArr} \PY{n+nb}{anyarray}\PY{p}{)}
@@ -673,11 +668,15 @@ fonctions qui permettent de traiter les données entrantes sous forme de
                 \PY{n}{i} \PY{n+nb}{int}\PY{p}{;}
                 \PY{n}{CoordX} \PY{n+nb}{numeric}\PY{p}{;}
                 \PY{n}{CoordY} \PY{n+nb}{numeric}\PY{p}{;}
+                \PY{n}{CodePostal} \PY{n+nb}{varchar}\PY{p}{;}
             \PY{k}{BEGIN}
                 \PY{k}{FOR} \PY{n}{i} \PY{k}{IN} \PY{l+m+mf}{1.}\PY{l+m+mf}{.}\PY{k}{coalesce}\PY{p}{(}\PY{n}{array\PYZus{}length}\PY{p}{(}\PY{n}{villeArr}\PY{p}{,} \PY{l+m+mf}{1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{0}\PY{p}{)} \PY{k}{LOOP}
+        
+                    \PY{k}{SELECT} \PY{k}{INTO} \PY{n}{CodePostal} \PY{n}{viCodePostal} \PY{k}{FROM} \PY{n}{VilleTemp} \PY{k}{WHERE} \PY{n}{viVille} \PY{k}{ILIKE}
+        \PY{n}{villeArr}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{;}
                     \PY{k}{SELECT} \PY{n}{viLambertX}\PY{p}{,} \PY{n}{viLambertY} \PY{k}{INTO} \PY{n}{CoordX}\PY{p}{,} \PY{n}{CoordY}
                     \PY{k}{FROM} \PY{n}{VilleTemp}
-                    \PY{k}{WHERE} \PY{n}{viVille} \PY{k}{ILIKE} \PY{n}{villeArr}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{;}
+                    \PY{k}{WHERE} \PY{n}{viCodePostal} \PY{o}{=} \PY{n}{CodePostal}\PY{p}{;}
         
                     \PY{k}{row}\PY{l+m+mf}{.}\PY{n}{CoordX} \PY{o}{:=} \PY{n}{CoordX}\PY{p}{;}
                     \PY{k}{row}\PY{l+m+mf}{.}\PY{n}{CoordY} \PY{o}{:=} \PY{n}{CoordY}\PY{p}{;}
@@ -794,7 +793,9 @@ table pour insérer les coordonnées.
                 \PY{c+c1}{\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}\PYZhy{}}
                 \PY{n}{ReferenceCindocVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{ReferenceCindoc}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
                 \PY{n}{DiscriminantVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Discriminant}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-                \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{pretty}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+                \PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville} \PY{o}{:=} \PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+                \PY{n}{VilleVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{pretty}\PY{p}{(}\PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{regexp\PYZus{}replace}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{Ville}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}s}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{g}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}\PY{p}{;}
                 \PY{n}{SujetVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{string\PYZus{}to\PYZus{}array}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{sujet}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{,}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
                 \PY{n}{DateVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{traitement\PYZus{}date}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n+nb}{Date}\PY{p}{)}\PY{p}{;}
                 \PY{n}{NoteBPVals}\PY{l+m+mf}{.}\PY{n}{field} \PY{o}{:=} \PY{n}{split\PYZus{}string}\PY{p}{(}\PY{n}{NEW}\PY{l+m+mf}{.}\PY{n}{NoteBP}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
@@ -1403,7 +1404,7 @@ perdues.}\label{vuxe9rifier-si-on-a-des-donnuxe9es-perdues.}}
         \PY{p}{)}
         \PY{k}{FROM} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/data.csv}\PY{l+s+s1}{\PYZsq{}} \PY{k}{DELIMITER} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{     }\PY{l+s+s1}{\PYZsq{}} \PY{k}{CSV} \PY{k}{HEADER}\PY{p}{;}
         \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{CorrectionTemp}\PY{p}{;}
-        \PY{k}{DROP} \PY{k}{TABLE} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{VilleTemp}\PY{p}{;}
+        \PY{c+c1}{\PYZhy{}\PYZhy{}DROP TABLE IF EXISTS VilleTemp;}
         
         \PY{k}{SELECT} \PY{n}{verifier\PYZus{}normalisation}\PY{p}{(}\PY{p}{)}\PY{p}{;}
 \end{Verbatim}

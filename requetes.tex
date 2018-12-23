@@ -1,0 +1,752 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+\documentclass[11pt]{article}
+
+    
+    
+    \usepackage[T1]{fontenc}
+    % Nicer default font (+ math font) than Computer Modern for most use cases
+    \usepackage{mathpazo}
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % We will generate all images so they have a width \maxwidth. This means
+    % that they will get their normal width if they fit onto the page, but
+    % are scaled down if they would overflow the margins.
+    \makeatletter
+    \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+    \else\Gin@nat@width\fi}
+    \makeatother
+    \let\Oldincludegraphics\includegraphics
+    % Set max figure width to be 80% of text width, for now hardcoded.
+    \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionLabelFormat{nolabel}{}
+    \captionsetup{labelformat=nolabel}
+
+    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range 
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    \usepackage{mathrsfs}
+    
+
+    
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+    \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+    \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    % Document title
+    \title{Requêtes}
+    \author{
+	Amina, KACIMI \and
+	Valentin, DEHAINAULT \and
+	Minh-Hoang DANG
+}
+    
+    
+    
+    
+
+    % Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % Exact colors from NB
+    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+
+
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+    \begin{document}
+    
+    
+    \maketitle
+    
+    
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{c+c1}{\PYZhy{}\PYZhy{} connection: host=\PYZsq{}localhost\PYZsq{} dbname=\PYZsq{}Photographies\PYZsq{} user=\PYZsq{}postgres\PYZsq{}}
+        \PY{k}{password}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{postgres}\PY{l+s+s1}{\PYZsq{}}
+\end{Verbatim}
+
+    \hypertarget{pruxe9-requis}{%
+\section{Pré-requis:}\label{pruxe9-requis}}
+
+Pour pouvoir utiliser ce Notebook, il faut préparer votre environnement
+de travail avec certains outils ci-dessous.
+
+\hypertarget{pgadmin}{%
+\subsection{pgAdmin:}\label{pgadmin}}
+
+La base \texttt{Photographies} doit être crée préalablement et les
+parametres de connection (premiere cellule) doivent etre adaptées.
+
+\hypertarget{postgresql-kernel}{%
+\subsection{PostgreSQL kernel:}\label{postgresql-kernel}}
+
+La \href{https://github.com/mhoangvslev/postgres_kernel}{version
+experimentale} doit être installé:
+\texttt{pip\ install\ git+https://github.com/mhoangvslev/postgres\_kernel/}.
+Les extensions Jupyter sont optionels.
+
+    \hypertarget{proportions-et-uxe9volution}{%
+\section{Proportions et évolution}\label{proportions-et-uxe9volution}}
+
+\hypertarget{fonction-qui-permet-de-faire-les-histogrames}{%
+\subsection{Fonction qui permet de faire les
+histogrames}\label{fonction-qui-permet-de-faire-les-histogrames}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}2}]:} \PY{k}{DROP} \PY{k}{FUNCTION} \PY{k}{IF} \PY{k}{EXISTS} \PY{n}{histogram}\PY{p}{(}\PY{n+nb}{anyarray}\PY{p}{,}\PY{n+nb}{anyelement}\PY{p}{)}\PY{p}{;}
+        \PY{k}{CREATE} \PY{k}{OR} \PY{k}{REPLACE} \PY{k}{FUNCTION} \PY{n}{histogram}\PY{p}{(}\PY{n}{arr} \PY{n+nb}{anyarray}\PY{p}{,} \PY{n}{freq} \PY{n+nb}{anyelement}\PY{p}{)}
+        \PY{k}{RETURNS} \PY{n+nb}{varchar} \PY{k}{AS} \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}}
+            \PY{k}{DECLARE}
+                \PY{n}{v\PYZus{}max} \PY{n+nb}{integer} \PY{o}{:=} \PY{p}{(}\PY{k}{SELECT} \PY{n}{MAX}\PY{p}{(}\PY{n}{a}\PY{p}{)} \PY{k}{FROM} \PY{n}{unnest}\PY{p}{(}\PY{n}{arr}\PY{p}{)} \PY{n}{a}\PY{p}{)}\PY{p}{;}
+            \PY{k}{BEGIN}
+                \PY{k}{IF} \PY{n}{v\PYZus{}max} \PY{o}{=} \PY{l+m+mf}{0} \PY{k}{THEN} \PY{n}{v\PYZus{}max} \PY{o}{:=} \PY{l+m+mf}{1}\PY{p}{;} \PY{k}{END} \PY{k}{IF}\PY{p}{;}
+                \PY{k}{RETURN} \PY{n}{repeat}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{■}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{(}\PY{n}{freq}\PY{o}{::}\PY{k}{float}\PY{o}{/}\PY{p}{(}\PY{n}{v\PYZus{}max}\PY{p}{)} \PY{o}{*}\PY{l+m+mf}{30}\PY{p}{)}\PY{o}{::}\PY{n+nb}{int}\PY{p}{)}\PY{p}{;}
+        
+            \PY{k}{END}\PY{p}{;}
+        \PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZdl{}} \PY{k}{language} \PY{n}{plpgsql}\PY{p}{;}
+\end{Verbatim}
+
+    \hypertarget{le-pourcentage-de-photos-pris-dans-chaque-ville.-la-ville-qui-a-plus-de-photos}{%
+\subsection{Le pourcentage de photos pris dans chaque ville. (la ville
+qui a plus de
+photos)}\label{le-pourcentage-de-photos-pris-dans-chaque-ville.-la-ville-qui-a-plus-de-photos}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{k}{WITH}
+            \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+            \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                \PY{k}{SELECT} \PY{n}{NomVille}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+        \PY{n}{pourcentage}
+                \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{Ville} \PY{n}{v}
+                \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idVille} \PY{o}{=} \PY{n}{v}\PY{l+m+mf}{.}\PY{n}{idVille}
+                \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomVille}
+            \PY{p}{)}
+        \PY{k}{SELECT} \PY{n}{NomVille}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,}
+        \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+        \PY{k}{FROM} \PY{n}{query}
+        \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+        \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrl}
+\toprule
+ nomville             &   nbphoto &   pourcentage & bar                            \\
+\midrule
+ Orléans              &      6269 &      18.2291  & ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ \\
+ Gien                 &       841 &       2.44548 & ■■■■                           \\
+ Montargis            &       651 &       1.89299 & ■■■                            \\
+ Pithiviers           &       525 &       1.52661 & ■■■                            \\
+ Olivet               &       475 &       1.38122 & ■■                             \\
+ Beaugency            &       434 &       1.26199 & ■■                             \\
+ Sully-sur-Loire      &       427 &       1.24164 & ■■                             \\
+ Loire(fleuve)        &       421 &       1.22419 & ■■                             \\
+ La-Ferté-Saint-Aubin &       418 &       1.21547 & ■■                             \\
+ Beaune-la-Rolande    &       396 &       1.1515  & ■■                             \\
+\bottomrule
+\end{tabular}
+
+    
+    \hypertarget{le-pourcentage-de-prise-de-photos-en-fonction-des-annuxe9es.uxe9volution-sur-une-puxe9riode}{%
+\subsection{Le pourcentage de prise de photos en fonction des
+années.(évolution sur une
+période)}\label{le-pourcentage-de-prise-de-photos-en-fonction-des-annuxe9es.uxe9volution-sur-une-puxe9riode}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k}{WITH}
+            \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+            \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                \PY{k}{SELECT} \PY{n}{DateAnnee}\PY{o}{::}\PY{n+nb}{numeric} \PY{k}{as} \PY{n}{Annee}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+        \PY{n}{pourcentage}
+                \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{DatePhoto} \PY{n}{dp}
+                \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idDate} \PY{o}{=} \PY{n}{dp}\PY{l+m+mf}{.}\PY{n}{idDate}
+                \PY{k}{GROUP} \PY{k}{BY} \PY{n}{Annee}
+            \PY{p}{)}
+        \PY{k}{SELECT} \PY{n}{Annee}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,}
+        \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+        \PY{k}{FROM} \PY{n}{query}
+        \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+        \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{rrrl}
+\toprule
+   annee &   nbphoto &   pourcentage & bar                           \\
+\midrule
+    1975 &      6370 &      18.5228  & ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ \\
+    1996 &      2226 &       6.47281 & ■■■■■■■■■■                    \\
+    1973 &      1551 &       4.51003 & ■■■■■■■                       \\
+    1995 &      1469 &       4.27159 & ■■■■■■■                       \\
+    1999 &      1362 &       3.96045 & ■■■■■■                        \\
+    2001 &      1329 &       3.8645  & ■■■■■■                        \\
+    1983 &      1303 &       3.78889 & ■■■■■■                        \\
+    1982 &      1262 &       3.66967 & ■■■■■■                        \\
+    1998 &      1233 &       3.58534 & ■■■■■■                        \\
+    1969 &      1129 &       3.28293 & ■■■■■                         \\
+\bottomrule
+\end{tabular}
+
+    
+    \hypertarget{la-proportion-de-photos-selon-leur-taille.}{%
+\subsection{La proportion de photos selon leur
+taille.}\label{la-proportion-de-photos-selon-leur-taille.}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k}{WITH}
+            \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+            \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                \PY{k}{SELECT} \PY{n}{Taille}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+        \PY{n}{pourcentage}
+                \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{Cliche} \PY{n}{c}
+                \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idCliche} \PY{o}{=} \PY{n}{c}\PY{l+m+mf}{.}\PY{n}{idCliche}
+                \PY{k}{GROUP} \PY{k}{BY} \PY{n}{Taille}
+            \PY{p}{)}
+        \PY{k}{SELECT} \PY{n}{Taille}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,}
+        \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+        \PY{k}{FROM} \PY{n}{query}
+        \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+        \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+7 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrl}
+\toprule
+ taille         &   nbphoto &   pourcentage & bar                            \\
+\midrule
+ 10x12.5 (4x5") &     22687 &    65.9698    & ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ \\
+ 24x36          &      7224 &    21.0061    & ■■■■■■■■■■                     \\
+ 4.5x6          &      3013 &     8.76127   & ■■■■                           \\
+ 9x12           &      1817 &     5.28351   & ■■                             \\
+ 6x7            &        51 &     0.148299  &                                \\
+ 6x9            &        14 &     0.0407095 &                                \\
+ 6x6            &         9 &     0.0261704 &                                \\
+\bottomrule
+\end{tabular}
+
+    
+    \hypertarget{le-pourcentage-de-personnes-repruxe9sentuxe9es-par-ville-par-annuxe9e}{%
+\subsection{Le pourcentage de personnes représentées ( + par ville, par
+année)}\label{le-pourcentage-de-personnes-repruxe9sentuxe9es-par-ville-par-annuxe9e}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{k}{WITH}
+            \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+            \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                    \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+        \PY{n}{pourcentage}
+                \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}
+                \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre}
+                \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomOeuvre}
+            \PY{p}{)}
+        \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,}
+        \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+        \PY{k}{FROM} \PY{n}{query}
+        \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+        \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrl}
+\toprule
+ nomoeuvre                                        &   nbphoto &   pourcentage & bar            \\
+\midrule
+ JEANNE D'ARC                                     &       166 &     0.482698  & ■■■■■■■■■■■■■■ \\
+ CHIRAC Jacques (président de la République)      &       143 &     0.415819  & ■■■■■■■■■■■■   \\
+ BOLLÉE (famille), voir aussi Saint-Jean-de-Braye &        95 &     0.276243  & ■■■■■■■■       \\
+ DELMAS (ébéniste décorateur)                     &        70 &     0.203548  & ■■■■■■         \\
+ HUBERT Jean (joaillier, sculpteur, héraldiste)   &        70 &     0.203548  & ■■■■■■         \\
+ BERNEAU (pêcheur de saumons en Loire)            &        35 &     0.101774  & ■■■            \\
+ SOLON Bernard (taillendier)                      &        33 &     0.0959581 & ■■■            \\
+ BOULET René (sabotier)                           &        32 &     0.0930503 & ■■■            \\
+ AVEZARD Pierre                                   &        27 &     0.0785112 & ■■             \\
+ DABARD (distillateur)                            &        26 &     0.0756034 & ■■             \\
+\bottomrule
+\end{tabular}
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{k}{WITH}
+             \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+             \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                 \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{NomVille}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+         \PY{n}{pourcentage}
+                 \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}\PY{p}{,} \PY{n}{Ville} \PY{n}{v}
+                 \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{k}{and} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idVille} \PY{o}{=} \PY{n}{v}\PY{l+m+mf}{.}\PY{n}{idVille}
+                 \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{NomVille}
+             \PY{p}{)}
+         \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{NomVille}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage}
+         \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+         \PY{k}{FROM} \PY{n}{query}
+         \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+         \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{llrrl}
+\toprule
+ nomoeuvre                                        & nomville            &   nbphoto &   pourcentage & bar           \\
+\midrule
+ JEANNE D'ARC                                     & Orléans             &       154 &      0.447805 & ■■■■■■■■■■■■■ \\
+ CHIRAC Jacques (président de la République)      & Orléans             &       143 &      0.415819 & ■■■■■■■■■■■■  \\
+ BOLLÉE (famille), voir aussi Saint-Jean-de-Braye & Saint-Jean-de-Braye &        95 &      0.276243 & ■■■■■■■■      \\
+ DELMAS (ébéniste décorateur)                     & Nargis              &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Chécy               &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Bellegarde          &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Châtillon-le-Roi    &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Gien                &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Mignerette          &        70 &      0.203548 & ■■■■■■        \\
+ DELMAS (ébéniste décorateur)                     & Montargis           &        70 &      0.203548 & ■■■■■■        \\
+\bottomrule
+\end{tabular}
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}20}]:} \PY{k}{WITH}
+             \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+             \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                 \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{DateAnnee}\PY{o}{::}\PY{n+nb}{numeric}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+         \PY{n}{pourcentage}
+                 \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}\PY{p}{,} \PY{n}{DatePhoto} \PY{n}{dp}
+                 \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{k}{and} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idDate} \PY{o}{=} \PY{n}{dp}\PY{l+m+mf}{.}\PY{n}{idDate}
+                 \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{DateAnnee}
+             \PY{p}{)}
+         \PY{k}{SELECT} \PY{n}{NomOeuvre}\PY{p}{,} \PY{n}{DateAnnee}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage}
+         \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+         \PY{k}{FROM} \PY{n}{query}
+         \PY{k}{ORDER} \PY{k}{BY} \PY{n}{NomOeuvre}
+         \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrrl}
+\toprule
+ nomoeuvre                                &   dateannee &   nbphoto &   pourcentage & bar   \\
+\midrule
+ AVEZARD Pierre                           &        1982 &        27 &    0.0785112  & ■■    \\
+ BEAUDIN (chaisier)                       &        1982 &        16 &    0.0465252  & ■     \\
+ BEAUHARNAIS, Anne de (marquise de Cepoy) &        1975 &         1 &    0.00290782 &       \\
+ BECQUEREL, Antoine-César (physicien)     &        1982 &         4 &    0.0116313  &       \\
+ BECQUEREL, Antoine-César (physicien)     &        1975 &         3 &    0.00872347 &       \\
+ BECQUEREL, Antoine-César (physicien)     &        1993 &         1 &    0.00290782 &       \\
+ BECQUEREL, Antoine-César (physicien)     &        1981 &         2 &    0.00581564 &       \\
+ BECQUEREL (famille)                      &        1982 &         6 &    0.0174469  & ■     \\
+ BERNEAU (pêcheur de saumons en Loire)    &        1963 &         5 &    0.0145391  &       \\
+ BERNEAU (pêcheur de saumons en Loire)    &        1962 &        17 &    0.049433   & ■     \\
+\bottomrule
+\end{tabular}
+
+    
+    \hypertarget{le-pourcentage-de-type-doeuvre-repruxe9sentuxe9es-par-ville-par-annuxe9e}{%
+\subsection{Le pourcentage de type d'oeuvre représentées (+ par ville,
+par
+année)}\label{le-pourcentage-de-type-doeuvre-repruxe9sentuxe9es-par-ville-par-annuxe9e}}
+
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}24}]:} \PY{k}{WITH}
+             \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+             \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                 \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+         \PY{n}{pourcentage}
+                 \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}\PY{p}{,} \PY{n}{TypeOeuvre} \PY{n}{t}
+                 \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{k}{and} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{TypeOeuvre} \PY{o}{=} \PY{n}{t}\PY{l+m+mf}{.}\PY{n}{idType}
+                 \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomType}
+             \PY{p}{)}
+         \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from} \PY{n}{query}\PY{p}{)}\PY{p}{,}
+         \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+         \PY{k}{FROM} \PY{n}{query}
+         \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+         \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrl}
+\toprule
+ nomtype               &   nbphoto &   pourcentage & bar                           \\
+\midrule
+                       &       666 &     1.93661   & ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ \\
+ fête                  &       143 &     0.415819  & ■■■■■■                        \\
+ statue                &       122 &     0.354754  & ■■■■■                         \\
+ fonderie Bollée       &        95 &     0.276243  & ■■■■                          \\
+ plaque commémorative  &        31 &     0.0901425 & ■                             \\
+ monument commémoratif &         7 &     0.0203548 &                               \\
+ tombeau               &         6 &     0.0174469 &                               \\
+ maison                &         6 &     0.0174469 &                               \\
+ mausolée              &         6 &     0.0174469 &                               \\
+ foyer                 &         5 &     0.0145391 &                               \\
+\bottomrule
+\end{tabular}
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}25}]:} \PY{k}{WITH}
+             \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+             \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                 \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,} \PY{n}{NomVille}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+         \PY{n}{pourcentage}
+                 \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}\PY{p}{,} \PY{n}{TypeOeuvre} \PY{n}{t}\PY{p}{,} \PY{n}{Ville} \PY{n}{v}
+                 \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{k}{and} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{TypeOeuvre} \PY{o}{=} \PY{n}{t}\PY{l+m+mf}{.}\PY{n}{idType} \PY{k}{and} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idVille} \PY{o}{=}
+         \PY{n}{v}\PY{l+m+mf}{.}\PY{n}{idVille}
+                 \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomType}\PY{p}{,} \PY{n}{NomVille}
+             \PY{p}{)}
+         \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,} \PY{n}{NomVille}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from}
+         \PY{n}{query}\PY{p}{)}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+         \PY{k}{FROM} \PY{n}{query}
+         \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+         \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{llrrl}
+\toprule
+ nomtype         & nomville            &   nbphoto &   pourcentage & bar                        \\
+\midrule
+                 & Orléans             &       297 &      0.863623 & ■■■■■■■■■■■■■■■■■■■■■■■■■■ \\
+ fête            & Orléans             &       143 &      0.415819 & ■■■■■■■■■■■■               \\
+ fonderie Bollée & Saint-Jean-de-Braye &        95 &      0.276243 & ■■■■■■■■                   \\
+                 & Nargis              &        88 &      0.255888 & ■■■■■■■■                   \\
+                 & Montargis           &        80 &      0.232626 & ■■■■■■■                    \\
+                 & Gien                &        76 &      0.220994 & ■■■■■■■                    \\
+                 & Saint-Jean-de-Braye &        76 &      0.220994 & ■■■■■■■                    \\
+                 & Chécy               &        75 &      0.218087 & ■■■■■■■                    \\
+                 & Mignerette          &        70 &      0.203548 & ■■■■■■                     \\
+                 & Châtillon-le-Roi    &        70 &      0.203548 & ■■■■■■                     \\
+\bottomrule
+\end{tabular}
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}26}]:} \PY{k}{WITH}
+             \PY{n}{subquery} \PY{k}{AS}\PY{p}{(}\PY{k}{SELECT} \PY{n}{COUNT}\PY{p}{(}\PY{n}{Article}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{Photo}\PY{p}{)}\PY{p}{,}
+             \PY{n}{query} \PY{k}{AS}\PY{p}{(}
+                 \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,} \PY{n}{DateAnnee}\PY{o}{::}\PY{n+nb}{numeric}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)} \PY{k}{as} \PY{n}{nbPhoto}\PY{p}{,}
+                     \PY{n}{COUNT}\PY{p}{(}\PY{k}{DISTINCT} \PY{n}{PhotoArticle}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100}\PY{o}{/}\PY{p}{(}\PY{k}{SELECT} \PY{n}{nbPhoto} \PY{k}{FROM} \PY{n}{subquery}\PY{p}{)} \PY{o}{::}\PY{k}{float} \PY{k}{as}
+         \PY{n}{pourcentage}
+                 \PY{k}{FROM} \PY{k}{Document} \PY{n}{d}\PY{p}{,} \PY{n}{IndexPersonne} \PY{n}{p}\PY{p}{,} \PY{n}{TypeOeuvre} \PY{n}{t}\PY{p}{,} \PY{n}{DatePhoto} \PY{n}{dp}
+                 \PY{k}{WHERE} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{o}{=} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{idOeuvre} \PY{k}{and} \PY{n}{p}\PY{l+m+mf}{.}\PY{n}{TypeOeuvre} \PY{o}{=} \PY{n}{t}\PY{l+m+mf}{.}\PY{n}{idType} \PY{k}{and} \PY{n}{d}\PY{l+m+mf}{.}\PY{n}{idDate} \PY{o}{=}
+         \PY{n}{dp}\PY{l+m+mf}{.}\PY{n}{idDate}
+                 \PY{k}{GROUP} \PY{k}{BY} \PY{n}{NomType}\PY{p}{,} \PY{n}{DateAnnee}
+             \PY{p}{)}
+         \PY{k}{SELECT} \PY{n}{NomType}\PY{p}{,} \PY{n}{DateAnnee}\PY{p}{,} \PY{n}{nbPhoto}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{,} \PY{n}{histogram}\PY{p}{(}\PY{k}{ARRAY}\PY{p}{(}\PY{k}{SELECT} \PY{n}{pourcentage} \PY{k}{from}
+         \PY{n}{query}\PY{p}{)}\PY{p}{,} \PY{n}{pourcentage}\PY{p}{)} \PY{k}{as} \PY{n}{bar}
+         \PY{k}{FROM} \PY{n}{query}
+         \PY{k}{ORDER} \PY{k}{BY} \PY{n}{nbPhoto} \PY{k}{DESC}
+         \PY{k}{LIMIT} \PY{l+m+mf}{10}\PY{p}{;}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+10 row(s) returned.
+
+    \end{Verbatim}
+
+    \begin{tabular}{lrrrl}
+\toprule
+ nomtype         &   dateannee &   nbphoto &   pourcentage & bar                \\
+\midrule
+                 &        1975 &       211 &     0.61355   & ■■■■■■■■■■■■■■■■■■ \\
+                 &        1996 &       145 &     0.421634  & ■■■■■■■■■■■■■      \\
+ fête            &        1996 &       143 &     0.415819  & ■■■■■■■■■■■■       \\
+                 &        1982 &       112 &     0.325676  & ■■■■■■■■■■         \\
+ fonderie Bollée &        1975 &        95 &     0.276243  & ■■■■■■■■           \\
+                 &        1999 &        42 &     0.122129  & ■■■■               \\
+                 &        1972 &        32 &     0.0930503 & ■■■                \\
+                 &        1994 &        23 &     0.0668799 & ■■                 \\
+                 &        1974 &        23 &     0.0668799 & ■■                 \\
+                 &        1962 &        22 &     0.0639721 & ■■                 \\
+\bottomrule
+\end{tabular}
+
+    
+   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor} }]:} 
+\end{Verbatim}
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+    \end{document}
