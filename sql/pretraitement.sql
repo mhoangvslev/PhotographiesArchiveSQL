@@ -1,8 +1,8 @@
 
 -- connection: host='localhost' dbname='Photographies' user='postgres' password='postgres'
 
-DROP EXTENSION IF EXISTS btree_gin CASCADE;
---CREATE EXTENSION pg_trgm;
+DROP EXTENSION IF EXISTS btree_gin, pg_trgm CASCADE;
+CREATE EXTENSION pg_trgm;
 CREATE EXTENSION btree_gin;
 
 /**
@@ -35,6 +35,23 @@ CREATE TABLE CorrectionTemp(
     N_V varchar NULL,
     C_G varchar NULL,
     Remarques varchar NULL
+);
+
+-- Optimisation
+DROP INDEX IF EXISTS index_trgm_correction_temp;
+CREATE INDEX index_trgm_correction_temp ON CorrectionTemp USING gin(
+    ReferenceCindoc gin_trgm_ops,
+    Discriminant gin_trgm_ops,
+    Ville gin_trgm_ops,
+    Sujet gin_trgm_ops,
+    Date gin_trgm_ops,
+    FicNum gin_trgm_ops,
+    Idx_per gin_trgm_ops,
+    Idx_ico gin_trgm_ops,
+    NbrCli gin_trgm_ops,
+    TailleCli gin_trgm_ops,
+    n_v gin_trgm_ops,
+    c_g gin_trgm_ops
 );
 
  
@@ -93,8 +110,9 @@ COPY VilleTemp (
  * Optimiser: la requête sur la table ville comme on n'a besoin que de 2 attributs
  * 5 mins -> 28s
  *=============================================*/
-CREATE INDEX idx_Ville_Nom_Coords ON VilleTemp(viVille, viLambertX, viLambertY);
-CREATE INDEX idx_Ville_Patterns ON VilleTemp USING gin(viVille gin_trgm_ops);
+CREATE INDEX idx_ville_nom_cp ON VilleTemp(viVille, viCodePostal);
+CREATE INDEX idx_ville_cp_coords ON VilleTemp(viCodePostal, viLambertX, viLambertY);
+CREATE INDEX idx_ville_patterns ON VilleTemp USING gin(viVille gin_trgm_ops);
 
 /**
  * COMPOSITE TYPE: insert_array
@@ -300,8 +318,7 @@ $$ LANGUAGE plpgsql;
 
 
 /**
- * FUNCTION: traitement_c_g(str)
- *  coulieur = CLR, noir&blanc = GSC (greyscale)
+ * FUNCTION: traitement_coord(str)
  */
 DROP FUNCTION IF EXISTS traitement_coord;
 CREATE OR REPLACE FUNCTION traitement_coord( villeArr anyarray) 
@@ -312,11 +329,14 @@ RETURNS CoordLambert93[] AS $$
         i int;
         CoordX numeric;
         CoordY numeric;
+        CodePostal varchar;
     BEGIN
         FOR i IN 1..coalesce(array_length(villeArr, 1), 0) LOOP
+        
+            SELECT INTO CodePostal viCodePostal FROM VilleTemp WHERE viVille ILIKE villeArr[i];
             SELECT viLambertX, viLambertY INTO CoordX, CoordY
             FROM VilleTemp 
-            WHERE viVille ILIKE villeArr[i];
+            WHERE viCodePostal = CodePostal;
     
             row.CoordX := CoordX; 
             row.CoordY := CoordY;
@@ -387,7 +407,8 @@ RETURNS TRIGGER AS $$
         -----------------------------------------------------------------------------
         ReferenceCindocVals.field := string_to_array(NEW.ReferenceCindoc, '|');
         DiscriminantVals.field := string_to_array(NEW.Discriminant, '|');
-        VilleVals.field := pretty(string_to_array(NEW.Ville, ','));
+        NEW.Ville := regexp_replace(NEW.Ville, '--', '-');
+        VilleVals.field := pretty(string_to_array(regexp_replace(NEW.Ville, '\s', '', 'g'), ','));
         SujetVals.field := string_to_array(NEW.sujet, ','); 
         DateVals.field := traitement_date(NEW.Date);
         NoteBPVals.field := split_string(NEW.NoteBP, '|', '/');
@@ -397,6 +418,7 @@ RETURNS TRIGGER AS $$
         Idx_IcoVals.field := split_string(lower(NEW.Idx_ico), '|', '/');
         Idx_IcoVals.field := ARRAY(SELECT unnest(string_to_array(a, ',')) FROM unnest(Idx_IcoVals.field) a);
         NbrCliVals.field := split_string(NEW.NbrCli, '|', '/');
+        NbrCliVals.field := ARRAY(SELECT unnest(string_to_array(d, ',')) FROM unnest(NbrCliVals.field) d);
         TailleCliVals.field := traitement_cliche(NEW.TailleCli);
         N_VVals.field := traitement_n_v(string_to_array(NEW.n_v, ','));
         C_GVals.field := traitement_c_g(string_to_array(NEW.c_g, ','));
@@ -497,6 +519,33 @@ CREATE TABLE DatePhoto(
 );
 ALTER TABLE DatePhoto ADD CONSTRAINT pk_datephoto PRIMARY KEY(idDate);
 
+-- Triggers de contraintes : 
+
+-- trigger/fonction : verification que la photo ait été prise après la date de création de la photographie
+-- que le jour soit entre 1 et 31 et que le mois soit entre 1 et 12
+
+DROP FUNCTION IF EXISTS Function_VerificationsDate();
+CREATE OR REPLACE FUNCTION Function_VerificationsDate()
+RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW.DateAnnee::integer < 1840 and NEW.DateMois::integer < 2 and NEW.DateJour::integer < 7 THEN
+            RAISE EXCEPTION 'Annee de prise de la photo inferieure au 7 janvier 1839 (création de la photographie)';
+        ELSIF NEW.DateMois != '' AND (NEW.DateMois::integer < 0 OR NEW.DateMois::integer > 12) THEN
+            RAISE EXCEPTION 'Mois inferieur à 1 ou superieur a 12';
+        ELSIF NEW.DateJour != '' AND (NEW.DateJour::integer < 0 OR NEW.DateJour::integer > 31) THEN
+            RAISE EXCEPTION 'Jour inferieur a 1 ou superieur a 31';
+        ELSE
+            RETURN NEW;
+        END IF;
+    END; 
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS Trigger_VerificationsDate ON DatePhoto;
+CREATE TRIGGER Trigger_VerificationsDate
+BEFORE INSERT OR UPDATE ON DatePhoto
+FOR EACH ROW 
+    EXECUTE PROCEDURE Function_VerificationsDate();
+
 /* ========================================
  * TABLE: IndexPersonne, TypeOeuvre
  * Description: 
@@ -557,12 +606,13 @@ ALTER TABLE Sujet ADD CONSTRAINT pk_sujet PRIMARY KEY(idSujet);
 CREATE TABLE Photo(
     Article integer,
     Remarques varchar NULL,
-    NbrCli varchar NULL,
+    NbrCli integer NULL,
     DescDet varchar NULL,
     idSerie integer
 );
 ALTER TABLE Photo ADD CONSTRAINT pk_photo PRIMARY KEY(Article);
 ALTER TABLE Photo ADD CONSTRAINT fk_photo_serie FOREIGN KEY(idSerie) REFERENCES Serie(idSerie);
+ALTER TABLE Photo ADD CONSTRAINT chk_photo_nbrcli CHECK(NbrCli >= 1);
 
 /* ========================================
  * TABLE: Document
@@ -610,7 +660,7 @@ RETURNS numeric(2) AS $$
         ELSIF mois ILIKE 'Avril' THEN RETURN 4;
         ELSIF mois ILIKE 'Mai' THEN RETURN 5;
         ELSIF mois ILIKE 'Juin' THEN RETURN 6;
-        ELSIF mois ILIKE 'Jui{0,1}llet' THEN RETURN 7;
+        ELSIF mois ~* 'Jui{0,1}llet' THEN RETURN 7;
         ELSIF mois ILIKE 'Août' THEN RETURN 8;
         ELSIF mois ILIKE 'Septembre' THEN RETURN 9;
         ELSIF mois ILIKE 'Octobre' THEN RETURN 10;
@@ -815,7 +865,7 @@ RETURNS TRIGGER AS $$
         -- INSERT dans Photo;
         SELECT INTO v_idSerie idSerie FROM Serie WHERE NomSerie = NEW.Serie;
         INSERT INTO Photo (Article, Remarques, NbrCli, DescDet, idSerie)
-        VALUES (NEW.Article, NEW.Remarques, NEW.NbrCli, NEW.DescDet, v_idSerie)
+        VALUES (NEW.Article, NEW.Remarques, NEW.NbrCli::integer, NEW.DescDet, v_idSerie)
         ON CONFLICT DO NOTHING;
         
         -- INSERT dans Document
@@ -914,6 +964,6 @@ $$ language plpgsql;
 COPY CorrectionTemp( ReferenceCindoc, Serie, Article, Discriminant, Ville, Sujet, DescDet, Date, Notebp, Idx_per, FicNum, Idx_Ico, NbrCli, TailleCli, N_V, C_G, Remarques )
 FROM '/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/data.csv' DELIMITER '	' CSV HEADER;
 DROP TABLE IF EXISTS CorrectionTemp;
-DROP TABLE IF EXISTS VilleTemp;
+--DROP TABLE IF EXISTS VilleTemp;
 
 SELECT verifier_normalisation();
