@@ -26,9 +26,13 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 
 ## Organisation du répertoire:
 |-/
+
 |----docs: les pdfs des étapes 1 et 2
+
 |----pdfsrc: les fichiers csv nécessaire pour les scripts sql
+
 |----sql: les fichiers sql
+
 |----grafana: le tableau de bord
 
 ## Rapport:
