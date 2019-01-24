@@ -24,7 +24,19 @@ Les données sont fournies en format CSV avec les intitulés suivants :
   16. Couleur ou noir et blanc
   17. Remarques : informations du photographe des archives sur les photographies
 
-## Démonstration (Binder):
+## Organisation du répertoire:
+|-/
+|----docs: les pdfs des étapes 1 et 2
+|----pdfsrc: les fichiers csv nécessaire pour les scripts sql
+|----sql: les fichiers sql
+|----grafana: le tableau de bord
+
+## Rapport:
 [Trello](https://trello.com/b/traOSgOr/tea-bd)
 
 [![Waffle.io - Issues in progress](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.png?label=in%20progress&title=In%20Progress)](http://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
+
+- Visualiser les notebooks avec NBViewer:
+[requetes.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/requetes.ipynb)
+
+[pretraitement.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/pretraitement.ipynb)
