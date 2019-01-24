@@ -37,6 +37,7 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 [![Waffle.io - Issues in progress](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.png?label=in%20progress&title=In%20Progress)](http://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
 
 - Visualiser les notebooks avec NBViewer:
+
 [requetes.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/requetes.ipynb)
 
 [pretraitement.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/pretraitement.ipynb)
