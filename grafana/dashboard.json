@@ -1,0 +1,162 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Photographies",
+      "description": "Le pourcentage de prise de photos en fonction des années",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 2,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "dateannee",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT to_date(DateAnnee, 'YYYY') as Annee, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto\n        FROM Document d, DatePhoto dp\n        WHERE d.idDate = dp.idDate\n        GROUP BY Annee\n    )\nSELECT \n  Annee as time, \n  nbPhoto::text as metric, \n  nbPhoto\nFROM query\nGROUP BY Annee, nbPhoto\nORDER BY Annee DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "iddate"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "datephoto",
+          "timeColumn": "iddate",
+          "timeColumnType": "int4",
+          "where": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "60y",
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Fréquence de prise de photo au cours des années",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": true,
+        "alignLevel": null
+      }
+    }
+  ],
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": false,
+    "refresh_intervals": [
+      ""
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Statistiques",
+  "uid": "s6gA_b_ik",
+  "version": 2
+}
