@@ -36,6 +36,7 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 |----grafana: le tableau de bord
 
 ## Rapport:
+- Gestion du projet:
 [Trello](https://trello.com/b/traOSgOr/tea-bd)
 
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.svg?columns=all)](https://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
