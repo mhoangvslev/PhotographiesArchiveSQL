@@ -1,6 +1,15 @@
 
 -- connection: host='localhost' dbname='Photographies' user='postgres' password='postgres'
 
+SET effective_cache_size TO '9GB';
+SET maintenance_work_mem TO '768MB';
+SET default_statistics_target TO '100';
+SET random_page_cost TO '4';
+SET effective_io_concurrency TO '2';
+SET work_mem TO '157286kB';
+SET max_parallel_workers_per_gather TO '2';
+SET max_parallel_workers TO '4';
+
 DROP EXTENSION IF EXISTS btree_gin, pg_trgm CASCADE;
 CREATE EXTENSION pg_trgm;
 CREATE EXTENSION btree_gin;
@@ -10,8 +19,8 @@ CREATE EXTENSION btree_gin;
  * C'est un type qui contient un array de varchar
  * Le champ acceuillit les données préparées pour l'insertion
  */
-DROP TYPE IF EXISTS CoordLambert93 CASCADE;
-CREATE TYPE CoordLambert93 AS (
+DROP TYPE IF EXISTS Coords CASCADE;
+CREATE TYPE Coords AS (
     CoordX numeric,
     CoordY numeric
 );
@@ -74,7 +83,8 @@ CREATE TABLE Correction(
     N_V varchar(3) NULL, -- regex NEG|INV
     C_G varchar(3) NULL, -- regex 'GSC'|'CLR'
     Remarques varchar NULL, -- S
-    Coordonnees CoordLambert93 NULL
+    Lamberts Coords NULL,
+    Coords Coords NULL
 );
 
 DROP TABLE IF EXISTS VilleTemp;
@@ -111,7 +121,8 @@ COPY VilleTemp (
  * 5 mins -> 28s
  *=============================================*/
 CREATE INDEX idx_ville_nom_cp ON VilleTemp(viVille, viCodePostal);
-CREATE INDEX idx_ville_cp_coords ON VilleTemp(viCodePostal, viLambertX, viLambertY);
+CREATE INDEX idx_ville_cp_lambertcoords ON VilleTemp(viCodePostal, viLambertX, viLambertY);
+CREATE INDEX idx_ville_cp_coords ON VilleTemp(viCodePostal, viLatitude, viLongitude);
 CREATE INDEX idx_ville_patterns ON VilleTemp USING gin(viVille gin_trgm_ops);
 
 /**
@@ -318,14 +329,14 @@ $$ LANGUAGE plpgsql;
 
 
 /**
- * FUNCTION: traitement_coord(str)
+ * FUNCTION: traitement_lambert(str)
  */
-DROP FUNCTION IF EXISTS traitement_coord;
-CREATE OR REPLACE FUNCTION traitement_coord( villeArr anyarray) 
-RETURNS CoordLambert93[] AS $$
+DROP FUNCTION IF EXISTS traitement_lambert;
+CREATE OR REPLACE FUNCTION traitement_lambert( villeArr anyarray) 
+RETURNS Coords[] AS $$
     DECLARE
-        res CoordLambert93 ARRAY;
-        row CoordLambert93;
+        res Coords ARRAY;
+        row Coords;
         i int;
         CoordX numeric;
         CoordY numeric;
@@ -335,6 +346,36 @@ RETURNS CoordLambert93[] AS $$
         
             SELECT INTO CodePostal viCodePostal FROM VilleTemp WHERE viVille ILIKE villeArr[i];
             SELECT viLambertX, viLambertY INTO CoordX, CoordY
+            FROM VilleTemp 
+            WHERE viCodePostal = CodePostal;
+    
+            row.CoordX := CoordX; 
+            row.CoordY := CoordY;
+            
+            res = array_append(res, row);
+        END LOOP;
+        RETURN res;
+    END;
+$$ LANGUAGE plpgsql;
+
+/**
+ * FUNCTION: traitement_coords(str)
+ */
+DROP FUNCTION IF EXISTS traitement_coord;
+CREATE OR REPLACE FUNCTION traitement_coord( villeArr anyarray) 
+RETURNS Coords[] AS $$
+    DECLARE
+        res Coords ARRAY;
+        row Coords;
+        i int;
+        CoordX numeric;
+        CoordY numeric;
+        CodePostal varchar;
+    BEGIN
+        FOR i IN 1..coalesce(array_length(villeArr, 1), 0) LOOP
+        
+            SELECT INTO CodePostal viCodePostal FROM VilleTemp WHERE viVille ILIKE villeArr[i];
+            SELECT viLatitude, viLongitude INTO CoordX, CoordY
             FROM VilleTemp 
             WHERE viCodePostal = CodePostal;
     
@@ -396,7 +437,8 @@ RETURNS TRIGGER AS $$
         TailleCliVals insert_array;
         N_VVals insert_array;
         C_GVals insert_array;
-        CoordVals CoordLambert93[];
+        LambertVals Coords[];
+        CoordVals Coords[];
                 
         maxLength int;
         insertVals insert_array[];
@@ -422,6 +464,7 @@ RETURNS TRIGGER AS $$
         TailleCliVals.field := traitement_cliche(NEW.TailleCli);
         N_VVals.field := traitement_n_v(string_to_array(NEW.n_v, ','));
         C_GVals.field := traitement_c_g(string_to_array(NEW.c_g, ','));
+        LambertVals := traitement_lambert(VilleVals.field);
         CoordVals := traitement_coord(VilleVals.field);
         
         maxLength := getMaxLength(
@@ -447,7 +490,7 @@ RETURNS TRIGGER AS $$
         -----------------------------------------------------------------------------
         INSERT INTO Correction (ReferenceCindoc, Serie, Article, Discriminant, Ville, 
                 Sujet, DescDet, Date, NoteBP, Idx_Per, FicNum, Idx_Ico, NbrCli, 
-                TailleCli, N_V, C_G, Remarques, Coordonnees)
+                TailleCli, N_V, C_G, Remarques, Lamberts, Coords)
             VALUES(
                 unnest(
                     array_expand(ReferenceCindocVals.field, maxLength, ReferenceCindocVals.field[1])::int[]
@@ -470,7 +513,8 @@ RETURNS TRIGGER AS $$
                 unnest(pretty(array_expand(N_VVals.field, maxLength, N_VVals.field[1]))),
                 unnest(pretty(array_expand(C_GVals.field, maxLength, C_GVals.field[1]))),
                 NEW.Remarques,
-                unnest(array_expand(CoordVals, maxLength, CoordVals[1])::CoordLambert93[])
+                unnest(array_expand(LambertVals, maxLength, LambertVals[1])::Coords[]),
+                unnest(array_expand(CoordVals, maxLength, CoordVals[1])::Coords[])
             );
         RETURN NULL;
     END;
@@ -491,6 +535,8 @@ DROP TABLE IF EXISTS Document, Photo, Sujet, IndexIconographique, Cliche, TypeOe
 CREATE TABLE Ville(
     idVille integer,
     NomVille varchar UNIQUE,
+    Latitude numeric NULL,
+    Longitude numeric NULL,
     CoordX numeric NULL,
     CoordY numeric NULL
 );
@@ -787,10 +833,12 @@ RETURNS TRIGGER AS $$
         -- INSERT dans Ville
         IF (NEW.Ville IS NOT NULL ) THEN  
             SELECT INTO v_idVille COUNT(idVille) FROM Ville;
-            INSERT INTO Ville(idVille, NomVille, CoordX, CoordY) 
+            INSERT INTO Ville(idVille, NomVille, Latitude, Longitude, CoordX, CoordY) 
             VALUES(
                 (SELECT COUNT(idVille) FROM Ville)+1,
-                NEW.Ville, (NEW.Coordonnees).CoordX, (NEW.Coordonnees).CoordY) 
+                NEW.Ville, 
+                (NEW.Coords).CoordX, (NEW.Coords).CoordY,
+                (NEW.Lamberts).CoordX, (NEW.Lamberts).CoordY) 
             ON CONFLICT(NomVille) DO NOTHING;
             
         END IF;
@@ -813,7 +861,6 @@ RETURNS TRIGGER AS $$
                 v_date[1], v_date[2], v_date[3])
             ON CONFLICT(DateJour, DateMois, DateAnnee) DO NOTHING;
         END IF;
-        
         
         -- INSERT dans IdxPers;
         v_idxPer := split_oeuvre(NEW.idx_per);
@@ -873,7 +920,6 @@ RETURNS TRIGGER AS $$
         SELECT INTO v_idDate idDate FROM DatePhoto 
             WHERE DateJour = v_date[1] and DateMois = v_date[2] and DateAnnee = v_date[3];
             
-        
         SELECT INTO v_idOeuvre idOeuvre FROM IndexPersonne i, TypeOeuvre t
         WHERE NomOeuvre = v_idxPer[1] and NomType = v_idxPer[2] and i.TypeOeuvre = t.idType;
         
@@ -964,6 +1010,15 @@ $$ language plpgsql;
 COPY CorrectionTemp( ReferenceCindoc, Serie, Article, Discriminant, Ville, Sujet, DescDet, Date, Notebp, Idx_per, FicNum, Idx_Ico, NbrCli, TailleCli, N_V, C_G, Remarques )
 FROM '/home/minhhoangdang/L3/S5/BD/TEA/pdfsrc/data.csv' DELIMITER '	' CSV HEADER;
 DROP TABLE IF EXISTS CorrectionTemp;
---DROP TABLE IF EXISTS VilleTemp;
-
+DROP TABLE IF EXISTS VilleTemp;
 SELECT verifier_normalisation();
+
+-- Reset config
+RESET effective_cache_size;
+RESET maintenance_work_mem;
+RESET default_statistics_target;
+RESET random_page_cost;
+RESET effective_io_concurrency;
+RESET work_mem;
+RESET max_parallel_workers_per_gather;
+RESET max_parallel_workers;

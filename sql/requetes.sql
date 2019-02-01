@@ -1,4 +1,3 @@
-
 -- connection: host='localhost' dbname='Photographies' user='postgres' password='postgres'
 
 /*====================================================
@@ -6,14 +5,14 @@
  *====================================================*/
 DROP FUNCTION IF EXISTS chercher_photo_par_personne;
 CREATE OR REPLACE FUNCTION chercher_photo_par_personne(str varchar)
-RETURNS TABLE(Article integer, NomOeuvre varchar) AS $$
-    BEGIN
-        RETURN QUERY(
-            SELECT PhotoArticle, I.NomOeuvre FROM
-            Document D JOIN IndexPersonne I on D.idOeuvre=I.idOeuvre
-            WHERE I.NomOeuvre ILIKE '%' || str || '%'
-        );
-    END; 
+RETURNS TABLE(Article integer, Discriminant integer, NomOeuvre varchar) AS $$
+   BEGIN
+       RETURN QUERY(
+           SELECT DISTINCT PhotoArticle, D.Discriminant, I.NomOeuvre FROM
+           Document D JOIN IndexPersonne I on D.idOeuvre=I.idOeuvre
+           WHERE I.NomOeuvre LIKE '%' || str || '%'
+       );
+   END;
 $$ language plpgsql;
 
 SELECT * FROM chercher_photo_par_personne('Becquerel') LIMIT 10;
@@ -23,14 +22,14 @@ SELECT * FROM chercher_photo_par_personne('Becquerel') LIMIT 10;
  *====================================================*/
 DROP FUNCTION IF EXISTS chercher_photo_par_sujet;
 CREATE OR REPLACE FUNCTION chercher_photo_par_sujet(str varchar)
-RETURNS TABLE(PhotoArticle integer, NomOeuvre varchar) AS $$
-    BEGIN
-        RETURN QUERY(
-            SELECT D.PhotoArticle, S.DescSujet FROM
-            Document D JOIN Sujet S on D.idSujet = S.idSujet
-            WHERE S.DescSujet ILIKE '%' || str || '%'
-        );
-    END;  
+RETURNS TABLE(PhotoArticle integer, Discriminant integer, NomOeuvre varchar) AS $$
+   BEGIN
+       RETURN QUERY(
+           SELECT DISTINCT D.PhotoArticle, D.Discriminant, S.DescSujet FROM
+           Document D JOIN Sujet S on D.idSujet = S.idSujet
+           WHERE S.DescSujet ILIKE '%' || str || '%'
+       );
+   END; 
 $$ language plpgsql;
 
 SELECT * FROM chercher_photo_par_sujet('église') LIMIT 10;
@@ -60,10 +59,12 @@ SELECT * FROM photo_en_noirblanc LIMIT 10;
 /*====================================================
  * Les photos qui ont un fichier numérique.(view)
  *====================================================*/ 
+DROP INDEX IF EXISTS index_ficnum;
+CREATE INDEX index_ficnum ON Document(FicNum);
 CREATE OR REPLACE VIEW view_photo_numeric AS
-    SELECT DISTINCT(Article), Remarques, NbrCli, DescDet, idSerie  
-    FROM Photo P JOIN Document D ON P.Article = D.PhotoArticle
-    WHERE d.FicNum IS NOT NULL;
+SELECT DISTINCT(Article), Remarques, NbrCli, DescDet, idSerie 
+FROM Photo P JOIN Document D ON P.Article = D.PhotoArticle
+WHERE d.FicNum IS NOT NULL;
 
 SELECT * FROM view_photo_numeric LIMIT 10;
 
