@@ -27,7 +27,7 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 ## Organisation du répertoire:
 |-/
 
-|----docs: les pdfs des étapes 1 et 2
+|----docs: tous les rapports du projet
 
 |----pdfsrc: les fichiers csv nécessaire pour les scripts sql
 
