@@ -38,10 +38,10 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 ## Rapport:
 [Trello](https://trello.com/b/traOSgOr/tea-bd)
 
-[![Waffle.io - Issues in progress](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.png?label=in%20progress&title=In%20Progress)](http://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.svg?columns=all)](https://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
 
 - Visualiser les notebooks avec NBViewer:
 
-[requetes.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/requetes.ipynb)
+[requetes.ipynb (nbviewer)](https://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/docs/phase%201/requetes.ipynb)
 
-[pretraitement.ipynb (nbviewer)](http://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/pretraitement.ipynb)
+[pretraitement.ipynb (nbviewer)](https://nbviewer.jupyter.org/github/mhoangvslev/PhotographiesArchiveSQL/blob/master/docs/phase%201/pretraitement.ipynb)
