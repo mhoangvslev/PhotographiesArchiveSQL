@@ -1,46 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PHOTOGRAPHIES",
-      "label": "Photographies",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "postgres",
-      "pluginName": "PostgreSQL"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.4.3"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-worldmap-panel",
-      "name": "Worldmap Panel",
-      "version": "0.1.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "postgres",
-      "name": "PostgreSQL",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -57,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -69,7 +27,6 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PHOTOGRAPHIES}",
       "decimals": 2,
       "format": "short",
       "gauge": {
@@ -81,9 +38,468 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
+        "w": 5,
         "x": 0,
         "y": 0
+      },
+      "id": 12,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "func_avg_photo_ville",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT func_avg_photo_ville();",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Le nombre moyen de photo par ville",
+      "transparent": true,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "circleMaxSize": 30,
+      "circleMinSize": 2,
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "Photographies",
+      "decimals": 0,
+      "description": "",
+      "esMetric": "Count",
+      "gridPos": {
+        "h": 12,
+        "w": 10,
+        "x": 5,
+        "y": 0
+      },
+      "hideEmpty": false,
+      "hideZero": false,
+      "id": 25,
+      "initialZoom": 1,
+      "links": [],
+      "locationData": "table",
+      "mapCenter": "custom",
+      "mapCenterLatitude": "46",
+      "mapCenterLongitude": "2",
+      "maxDataPoints": 1,
+      "mouseWheelZoom": true,
+      "showLegend": true,
+      "stickyLabels": true,
+      "tableQueryOptions": {
+        "geohashField": "geohash",
+        "labelField": "location",
+        "latitudeField": "latitude",
+        "longitudeField": "longitude",
+        "metricField": "metric",
+        "queryType": "coordinates"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "nomville",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  NomType, NomVille,\n  v.NomVille as \"location\", \n  v.latitude as \"latitude\",\n  v.longitude as \"longitude\",\n  COUNT(DISTINCT PhotoArticle) as \"metric\"\nFROM Document d, IndexPersonne p, TypeOeuvre t, Ville v\nWHERE d.idOeuvre = p.idOeuvre and p.TypeOeuvre = t.idType and d.idVille = v.idVille AND\n  latitude is not null AND latitude != 0 AND\n  longitude is not null AND longitude != 0\nGROUP BY NomType, NomVille, latitude, longitude",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "idville"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "ville",
+          "timeColumn": "idville",
+          "timeColumnType": "int4",
+          "where": [
+            {
+              "name": "$__unixEpochFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": "0,10",
+      "title": "Distribution des types d'oeuvre par ville",
+      "transparent": true,
+      "type": "grafana-worldmap-panel",
+      "unitPlural": "photos",
+      "unitSingle": "",
+      "unitSingular": "photo",
+      "valueName": "current"
+    },
+    {
+      "circleMaxSize": 30,
+      "circleMinSize": 2,
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "Photographies",
+      "decimals": 0,
+      "description": "",
+      "esMetric": "Count",
+      "gridPos": {
+        "h": 12,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "hideEmpty": false,
+      "hideZero": false,
+      "id": 26,
+      "initialZoom": 1,
+      "links": [],
+      "locationData": "table",
+      "mapCenter": "custom",
+      "mapCenterLatitude": "46",
+      "mapCenterLongitude": "2",
+      "maxDataPoints": 1,
+      "mouseWheelZoom": true,
+      "showLegend": true,
+      "stickyLabels": true,
+      "tableQueryOptions": {
+        "geohashField": "geohash",
+        "labelField": "location",
+        "latitudeField": "latitude",
+        "longitudeField": "longitude",
+        "metricField": "metric",
+        "queryType": "coordinates"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "nomville",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  NomOeuvre, NomVille,\n  v.NomVille as \"location\", \n  v.latitude as \"latitude\",\n  v.longitude as \"longitude\",\n  COUNT(DISTINCT PhotoArticle) as \"metric\"\nFROM Document d, IndexPersonne p, Ville v\nWHERE \n  d.idOeuvre = p.idOeuvre and d.idVille = v.idVille AND\n  latitude is not null AND latitude != 0 AND\n  longitude is not null AND longitude != 0\nGROUP BY NomOeuvre, NomVille, latitude, longitude",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "idville"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "ville",
+          "timeColumn": "idville",
+          "timeColumnType": "int4",
+          "where": [
+            {
+              "name": "$__unixEpochFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": "0,10",
+      "title": "Distribution des personnes prises en photo par ville",
+      "transparent": true,
+      "type": "grafana-worldmap-panel",
+      "unitPlural": "photos",
+      "unitSingle": "",
+      "unitSingular": "photo",
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 0,
+        "y": 3
+      },
+      "id": 10,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "count",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select count(distinct article) from ville_photo();",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Le nombre de photos dont on ne connaît pas la ville",
+      "transparent": true,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Photographies",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 0,
+        "y": 6
+      },
+      "id": 8,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "count",
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select COUNT(distinct article) from date_photo();",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Le nombre de photos dont on ne connait pas la date",
+      "transparent": true,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Photographies",
+      "decimals": 2,
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 0,
+        "y": 9
       },
       "id": 4,
       "interval": null,
@@ -163,113 +579,76 @@
       "valueName": "avg"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PHOTOGRAPHIES}",
-      "description": "Le pourcentage de prise de photos en fonction des années",
-      "fill": 1,
+      "columns": [],
+      "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
-        "x": 12,
-        "y": 0
+        "x": 0,
+        "y": 12
       },
-      "hideTimeOverride": true,
-      "id": 2,
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
+      "id": 24,
       "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": true,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 3,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
       "targets": [
         {
-          "format": "time_series",
+          "format": "table",
           "group": [],
-          "hide": false,
-          "metricColumn": "dateannee",
+          "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT to_date(DateAnnee, 'YYYY') as Annee, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto\n        FROM Document d, DatePhoto dp\n        WHERE d.idDate = dp.idDate\n        GROUP BY Annee\n    )\nSELECT \n  Annee as time, \n  nbPhoto::text as metric, \n  nbPhoto\nFROM query\nGROUP BY Annee, nbPhoto\nORDER BY Annee DESC",
+          "rawSql": "/*================================================\n * Le pourcentage de type d’oeuvre représentées (+ par ville, par année)\n *================================================*/\n \nWITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT NomType,\n            COUNT(DISTINCT PhotoArticle) as nbPhoto, \n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery) ::float as pourcentage\n        FROM Document d, IndexPersonne p, TypeOeuvre t\n        WHERE d.idOeuvre = p.idOeuvre and p.TypeOeuvre = t.idType and NomType != ''\n        GROUP BY NomType\n    )\nSELECT NomType, nbPhoto, pourcentage, histogram(ARRAY(SELECT pourcentage from query), pourcentage) as bar\nFROM query\nORDER BY nbPhoto DESC\nLIMIT 10;",
           "refId": "A",
           "select": [
             [
               {
                 "params": [
-                  "iddate"
+                  "value"
                 ],
                 "type": "column"
               }
             ]
           ],
-          "table": "datephoto",
-          "timeColumn": "iddate",
-          "timeColumnType": "int4",
-          "where": []
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "thresholds": [],
-      "timeFrom": "60y",
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Fréquence de prise de photo au cours des années",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "Nombre de photos prises",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": "Nombre de photos prises",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": true,
-        "alignLevel": null
-      }
+      "title": "Répartition de type d’oeuvre représentées",
+      "transform": "table",
+      "type": "table"
     },
     {
       "circleMaxSize": 30,
@@ -279,15 +658,15 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(50, 172, 45, 0.97)"
       ],
-      "datasource": "${DS_PHOTOGRAPHIES}",
+      "datasource": "Photographies",
       "decimals": 0,
       "description": "Y-a-t-il une ville moins documentée que l'autre?\nNote: certaines villes ne sont pas affiché car on  n'a pas ses coordonnées",
       "esMetric": "Count",
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 12
       },
       "hideEmpty": false,
       "hideZero": false,
@@ -349,6 +728,712 @@
       "unitSingle": "",
       "unitSingular": "photo",
       "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 14,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Article",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "photoarticle",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Discriminant",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "discriminant",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Date",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "datep",
+          "preserveFormat": true,
+          "sanitize": true,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT * FROM func_photos_anciennes_recents(10, true);",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Les 10 photos plus anciennes",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "id": 15,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Article",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "photoarticle",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Discriminant",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "discriminant",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Date",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "datep",
+          "preserveFormat": true,
+          "sanitize": true,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT DISTINCT(photoarticle), discriminant, datep FROM func_photos_anciennes_recents(10, false);",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Les 10 photos plus récentes",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Photographies",
+      "description": "Le pourcentage de prise de photos en fonction des années",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "hideTimeOverride": true,
+      "id": 2,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "dateannee",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT \n            to_date(DateAnnee, 'YYYY') as Annee, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto,\n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery)::float as pourcentage\n        FROM Document d, DatePhoto dp\n        WHERE d.idDate = dp.idDate\n        GROUP BY Annee\n    )\nSELECT \n  Annee as time, \n  concat(pourcentage::numeric(4, 2), '%') as metric, \n  nbPhoto\n  \nFROM query\nGROUP BY Annee, nbPhoto, pourcentage\nORDER BY Annee DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "iddate"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "datephoto",
+          "timeColumn": "iddate",
+          "timeColumnType": "int4",
+          "where": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "60y",
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Fréquence de prise de photo au cours des années",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": true,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Photographies",
+      "description": "",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "hideTimeOverride": true,
+      "id": 22,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "dateannee",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT \n            NomOeuvre,\n            to_date(DateAnnee, 'YYYY') as Annee, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto,\n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery)::float as pourcentage\n        FROM Document d, IndexPersonne p, DatePhoto dp\n        WHERE d.idOeuvre = p.idOeuvre and d.idDate = dp.idDate\n        GROUP BY NomOeuvre, DateAnnee\n    )\nSELECT \n  Annee as time, \n  NomOeuvre as metric, \n  nbPhoto\n  \nFROM query\nGROUP BY Annee, NomOeuvre, nbPhoto\nORDER BY Annee DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "iddate"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "datephoto",
+          "timeColumn": "iddate",
+          "timeColumnType": "int4",
+          "where": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "60y",
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Les personnes prises en photo au cours des années",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "Nombre de photos prises",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": true,
+        "alignLevel": null
+      }
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 21,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 2,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT NomOeuvre, NomVille,\n            COUNT(DISTINCT PhotoArticle) as nbPhoto, \n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery) ::float as pourcentage\n        FROM Document d, IndexPersonne p, Ville v\n        WHERE d.idOeuvre = p.idOeuvre and d.idVille = v.idVille\n        GROUP BY NomOeuvre, NomVille\n    )\nSELECT NomOeuvre, NomVille, nbPhoto, pourcentage, histogram(ARRAY(SELECT pourcentage from query), pourcentage) as bar\nFROM query\nORDER BY nbPhoto DESC\nLIMIT 10;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Les personnes les plus présentées ( par ville)",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 17,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "pourcentage",
+          "thresholds": [],
+          "type": "number",
+          "unit": "percent"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT NomVille, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto, \n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery) ::float as pourcentage\n        FROM Document d, Ville v\n        WHERE d.idVille = v.idVille\n        GROUP BY NomVille\n    )\nSELECT NomVille, nbPhoto, pourcentage, histogram(ARRAY(SELECT pourcentage from query), pourcentage) as bar\nFROM query\nORDER BY nbPhoto DESC\nLIMIT 10;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Répartition de photos prises dans chaque ville",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "id": 18,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "pourcentage",
+          "thresholds": [],
+          "type": "number",
+          "unit": "percent"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT Taille, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto, \n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery) ::float as pourcentage\n        FROM Document d, Cliche c\n        WHERE d.idCliche = c.idCliche\n        GROUP BY Taille\n    )\nSELECT Taille, nbPhoto, pourcentage, histogram(ARRAY(SELECT pourcentage from query), pourcentage) as bar\nFROM query\nORDER BY nbPhoto DESC\nLIMIT 10;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Répartition de photos selon leur taille.",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "Photographies",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "id": 19,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "pourcentage",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH \n    subquery AS(SELECT COUNT(Article) as nbPhoto FROM Photo),\n    query AS(\n        SELECT NomOeuvre, \n            COUNT(DISTINCT PhotoArticle) as nbPhoto, \n            COUNT(DISTINCT PhotoArticle)*100/(SELECT nbPhoto FROM subquery) ::float as pourcentage\n        FROM Document d, IndexPersonne p\n        WHERE d.idOeuvre = p.idOeuvre\n        GROUP BY NomOeuvre\n    )\nSELECT NomOeuvre, nbPhoto, pourcentage, histogram(ARRAY(SELECT pourcentage from query), pourcentage) as bar\nFROM query\nORDER BY nbPhoto DESC\nLIMIT 10;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Les personnes les plus présentées (général)",
+      "transform": "table",
+      "type": "table"
     }
   ],
   "refresh": false,
@@ -382,5 +1467,5 @@
   "timezone": "",
   "title": "Statistiques",
   "uid": "s6gA_b_ik",
-  "version": 6
+  "version": 12
 }
