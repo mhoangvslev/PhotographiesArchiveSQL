@@ -14,6 +14,7 @@ use App\Entity\TableForm;
 use App\Entity\TypeOeuvre;
 use App\Entity\Ville;
 use App\Entity\Cliche;
+use App\Form\DocumentFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -25,7 +26,40 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ManagerController extends AbstractController
 {
-    private $fieldChoices;
+
+    /**
+     * @Route("/manager/insert/{className}", name="managerInsert")
+     */
+    public function managerInsert(string $className, Request $request){
+
+        switch ($className){
+            case Document::class:
+                $formClass = DocumentFormType::class;
+                break;
+            default:
+                $formClass =  DocumentFormType::class;
+                break;
+        }
+
+        $form = $this->createForm($formClass);
+        $entityManager = $this->getDoctrine()->getManager();
+        $this->fieldChoices = $entityManager->getClassMetadata($className)->getFieldNames();
+        $query_result = array(
+            'tableName' => $className,
+            'tableHeads' => $entityManager->getClassMetadata($className)->getFieldNames(),
+            'tableContents' => $entityManager->getRepository($className)->findBy(array(), array(), 10, array()),
+        );
+
+        return $this->render('manager/insertDocument.html.twig', [
+            'controller_name' => 'ManagerController',
+            'tableName' => $className,
+            'tableForm' => $form->createView(),
+            'query_name' => $query_result['tableName'],
+            'query_field' => $query_result['tableHeads'],
+            'query_result' => $query_result['tableContents'],
+        ]);
+    }
+
     /**
      * @Route("/manager", name="manager")
      */
@@ -49,6 +83,9 @@ class ManagerController extends AbstractController
             ])
             ->add('queryLimit', IntegerType::class)
             ->add("Search", SubmitType::class, ['label' => 'Search'])
+            ->add("Insert", SubmitType::class, ['label' => 'Insert'])
+            ->add("Update", SubmitType::class, ['label' => 'Update'])
+            ->add("Delete", SubmitType::class, ['label' => 'Delete'])
             ->getForm();
 
         $query_result = array(
@@ -64,6 +101,11 @@ class ManagerController extends AbstractController
             // Search case
             if($dbForm->getClickedButton() && 'Search' === $dbForm->getClickedButton()->getName()) {
                 $query_result = $this->search($data);
+            }
+
+            // Search case
+            if($dbForm->getClickedButton() && 'Insert' === $dbForm->getClickedButton()->getName()) {
+                return $this->redirectToRoute('managerInsert', array('className' => $data->getTableName()));
             }
         }
 

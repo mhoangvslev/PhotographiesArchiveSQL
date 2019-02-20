@@ -1,0 +1,14 @@
+{% extends 'manager/index.html.twig' %}
+
+{% block title %}Insérer dans la base de données{% endblock %}
+
+{% block tableTitle %}
+    Contenu de <strong>{{ tableName }}</strong>:
+{% endblock %}
+
+{% block databaseForm %}
+    <div style="display: -ms-flexbox">
+        {{ form(tableForm) }}
+    </div>
+{% endblock %}
+
