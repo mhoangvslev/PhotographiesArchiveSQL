@@ -1,3 +1,5 @@
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.svg?columns=all)](https://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
+
 # PhotographiesArchiveSQL
 Demonstration of raw data handling using only PostgreSQL
 
@@ -38,8 +40,6 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 ## Rapport:
 - Gestion du projet:
 [Trello](https://trello.com/b/traOSgOr/tea-bd)
-
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/mhoangvslev/PhotographiesArchiveSQL.svg?columns=all)](https://waffle.io/mhoangvslev/PhotographiesArchiveSQL)
 
 - Visualiser les notebooks avec NBViewer:
 
