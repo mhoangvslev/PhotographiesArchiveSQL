@@ -42,6 +42,23 @@ class ManagerController extends AbstractController
         }
 
         $form = $this->createForm($formClass);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $data = $form->getData();
+
+            // Search case
+            if($form->getClickedButton() && 'Search' === $form->getClickedButton()->getName()) {
+                $query_result = $this->search($data);
+            }
+
+            // Search case
+            if($form->getClickedButton() && 'Manage' === $form->getClickedButton()->getName()) {
+                return $this->redirectToRoute('managerInsert', array('className' => $data->getTableName()));
+            }
+        }
+
+
         $entityManager = $this->getDoctrine()->getManager();
         $this->fieldChoices = $entityManager->getClassMetadata($className)->getFieldNames();
         $query_result = array(
@@ -83,9 +100,7 @@ class ManagerController extends AbstractController
             ])
             ->add('queryLimit', IntegerType::class)
             ->add("Search", SubmitType::class, ['label' => 'Search'])
-            ->add("Insert", SubmitType::class, ['label' => 'Insert'])
-            ->add("Update", SubmitType::class, ['label' => 'Update'])
-            ->add("Delete", SubmitType::class, ['label' => 'Delete'])
+            ->add("Manage", SubmitType::class, ['label' => 'Manage'])
             ->getForm();
 
         $query_result = array(
@@ -104,7 +119,7 @@ class ManagerController extends AbstractController
             }
 
             // Search case
-            if($dbForm->getClickedButton() && 'Insert' === $dbForm->getClickedButton()->getName()) {
+            if($dbForm->getClickedButton() && 'Manage' === $dbForm->getClickedButton()->getName()) {
                 return $this->redirectToRoute('managerInsert', array('className' => $data->getTableName()));
             }
         }

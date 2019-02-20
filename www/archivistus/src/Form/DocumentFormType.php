@@ -26,7 +26,8 @@ class DocumentFormType extends AbstractType
             ->add('idsujet')
             ->add('idico')
             ->add('idcliche')
-            ->add('Submit', SubmitType::class)
+            ->add('Insert/Update', SubmitType::class, ['label' => 'Insert/Update'])
+            ->add('Delete', SubmitType::class, ['label' => 'Delete'])
         ;
     }
 
