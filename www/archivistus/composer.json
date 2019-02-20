@@ -17,13 +17,15 @@
         "symfony/orm-pack": "^1.0",
         "symfony/process": "4.2.*",
         "symfony/security-bundle": "4.2.*",
+        "symfony/serializer": "4.2.*",
         "symfony/serializer-pack": "*",
         "symfony/swiftmailer-bundle": "^3.1",
         "symfony/translation": "4.2.*",
         "symfony/twig-bundle": "4.2.*",
         "symfony/validator": "4.2.*",
         "symfony/web-link": "4.2.*",
-        "symfony/yaml": "4.2.*"
+        "symfony/yaml": "4.2.*",
+        "twig/extensions": "^1.5"
     },
     "require-dev": {
         "symfony/debug-pack": "*",

@@ -6,29 +6,30 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ClicheRepository")
+ * @ORM\Table(name="Cliche")
  */
 class Cliche
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idCliche", type="integer")
      */
-    private $idCliche;
+    private $idcliche;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="Taille", type="string", length=255, nullable=true)
      */
     private $taille;
 
 
     public function getIdCliche(): ?int
     {
-        return $this->idCliche;
+        return $this->idcliche;
     }
 
-    public function setIdCliche(int $idCliche): self
+    public function setIdCliche(int $idcliche): self
     {
-        $this->idCliche = $idCliche;
+        $this->idcliche = $idcliche;
 
         return $this;
     }
@@ -43,5 +44,12 @@ class Cliche
         $this->taille = $taille;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idcliche,
+            $this->taille
+        );
     }
 }

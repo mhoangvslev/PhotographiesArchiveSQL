@@ -6,41 +6,25 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SerieRepository")
+ * @ORM\Table(name="Serie")
  */
 class Serie
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idSerie", type="integer")
      */
     private $idSerie;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="nomSerie", type="string", length=255)
      */
     private $nomSerie;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getIdSerie(): ?int
     {
         return $this->idSerie;
-    }
-
-    public function setIdSerie(int $idSerie): self
-    {
-        $this->idSerie = $idSerie;
-
-        return $this;
     }
 
     public function getNomSerie(): ?string
@@ -53,5 +37,12 @@ class Serie
         $this->nomSerie = $nomSerie;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idSerie,
+            $this->nomSerie
+        );
     }
 }

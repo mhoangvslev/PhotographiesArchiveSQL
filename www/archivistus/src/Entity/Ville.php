@@ -6,23 +6,18 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\VilleRepository")
+ * @ORM\Table(name="Ville")
  */
 class Ville
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idVille", type="integer")
      */
     private $idVille;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="nomVille", type="string", length=255)
      */
     private $nomVille;
 
@@ -46,10 +41,6 @@ class Ville
      */
     private $coordy;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getIdVille(): ?int
     {
@@ -121,5 +112,16 @@ class Ville
         $this->coordy = $coordy;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idVille,
+            $this->nomVille,
+            $this->latitude,
+            $this->longitude,
+            $this->coordx,
+            $this->coordy
+        );
     }
 }

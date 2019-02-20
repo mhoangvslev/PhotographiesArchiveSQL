@@ -11,51 +11,34 @@ class Photo
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
      * @ORM\Column(type="integer")
      */
     private $Article;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="remarques", type="string", length=255, nullable=true)
      */
     private $remarques;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="nbrcli", type="integer", nullable=true)
      */
     private $nbrcli;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="descdet", type="string", length=255, nullable=true)
      */
     private $descdet;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idSerie", type="integer")
      */
     private $idSerie;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getArticle(): ?int
     {
         return $this->Article;
-    }
-
-    public function setArticle(int $Article): self
-    {
-        $this->Article = $Article;
-
-        return $this;
     }
 
     public function getRemarques(): ?string
@@ -104,5 +87,15 @@ class Photo
         $this->idSerie = $idSerie;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->Article,
+            $this->remarques,
+            $this->nbrcli,
+            $this->descdet,
+            $this->idSerie
+        );
     }
 }

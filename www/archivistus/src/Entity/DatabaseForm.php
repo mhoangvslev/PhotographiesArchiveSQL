@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\TableFormRepository")
  */
-class TableForm
+class DatabaseForm
 {
     /**
      * @ORM\Id()
@@ -22,9 +22,14 @@ class TableForm
     private $tableName;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="integer")
      */
-    private $condition;
+    private $queryLimit;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $queryField;
 
     public function getId(): ?int
     {
@@ -43,14 +48,26 @@ class TableForm
         return $this;
     }
 
-    public function getCondition(): ?string
+    public function getQueryLimit(): ?int
     {
-        return $this->condition;
+        return $this->queryLimit;
     }
 
-    public function setCondition(string $condition): self
+    public function setQueryLimit(int $queryLimit): self
     {
-        $this->condition = $condition;
+        $this->queryLimit = $queryLimit;
+
+        return $this;
+    }
+
+    public function getQueryField(): ?string
+    {
+        return $this->queryField;
+    }
+
+    public function setQueryField(?string $queryField): self
+    {
+        $this->queryField = $queryField;
 
         return $this;
     }

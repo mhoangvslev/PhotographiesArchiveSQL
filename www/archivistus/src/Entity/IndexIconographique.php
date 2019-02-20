@@ -6,17 +6,18 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\IndexIconographiqueRepository")
+ * @ORM\Table(name="IndexIconographique")
  */
 class IndexIconographique
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idIco", type="integer")
      */
     private $idIco;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="idx_ico", type="string", length=255)
      */
     private $idx_ico;
 
@@ -47,5 +48,12 @@ class IndexIconographique
         $this->idx_ico = $idx_ico;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idIco,
+            $this->idx_ico
+        );
     }
 }

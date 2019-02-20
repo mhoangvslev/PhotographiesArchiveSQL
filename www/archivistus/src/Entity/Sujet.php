@@ -6,30 +6,20 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SujetRepository")
+ * @ORM\Table(name="Sujet")
  */
 class Sujet
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idSujet", type="integer")
      */
     private $idSujet;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="descSujet", type="string", length=255)
      */
     private $descSujet;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getIdSujet(): ?int
     {
@@ -53,5 +43,12 @@ class Sujet
         $this->descSujet = $descSujet;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idSujet,
+            $this->descSujet
+        );
     }
 }

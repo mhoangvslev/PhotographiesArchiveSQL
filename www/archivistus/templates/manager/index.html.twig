@@ -1,3 +1,34 @@
 {% extends 'manager_base.html.twig' %}
 
-{% block title %}Hello ManageController!{% endblock %}
+{% block title %}Gérer la base de données{% endblock %}
+
+{% block tableTitle %}
+    {{ query_name }}
+{% endblock %}
+
+{% block tableHeads %}
+    <tr>
+        {% for row in query_field %}
+            <th>{{ row }}</th>
+        {% endfor %}
+    </tr>
+{% endblock %}
+
+{% block tableContents %}
+    {% for row in query_result %}
+        <tr>
+            {% for field in row.toArray() %}
+                <td>{{ field }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+{% block tableFeet %}
+    <tr>
+        {% for row in query_field %}
+            <th>{{ row }}</th>
+        {% endfor %}
+    </tr>
+{% endblock %}

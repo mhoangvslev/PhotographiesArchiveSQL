@@ -14,7 +14,7 @@ class Document
      * @ORM\Id()
      * @ORM\Column(type="integer")
      */
-    private $photoArticle;
+    private $photoarticle;
 
     /**
      * @ORM\Column(type="integer")
@@ -34,7 +34,7 @@ class Document
     /**
      * @ORM\Column(type="string", length=6, nullable=true)
      */
-    private $referenceCindoc;
+    private $referencecindoc;
 
     /**
      * @ORM\Column(type="string", length=3, nullable=true)
@@ -49,42 +49,42 @@ class Document
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idVille;
+    private $idville;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idDate;
+    private $iddate;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idOeuvre;
+    private $idoeuvre;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idSujet;
+    private $idsujet;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idIco;
+    private $idico;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $idCliche;
+    private $idcliche;
 
 
     public function getPhotoArticle(): ?int
     {
-        return $this->photoArticle;
+        return $this->photoarticle;
     }
 
-    public function setPhotoArticle(int $photoArticle): self
+    public function setPhotoArticle(int $photoarticle): self
     {
-        $this->photoArticle = $photoArticle;
+        $this->photoarticle = $photoarticle;
 
         return $this;
     }
@@ -127,12 +127,12 @@ class Document
 
     public function getReferenceCindoc(): ?string
     {
-        return $this->referenceCindoc;
+        return $this->referencecindoc;
     }
 
-    public function setReferenceCindoc(?string $referenceCindoc): self
+    public function setReferenceCindoc(?string $referencecindoc): self
     {
-        $this->referenceCindoc = $referenceCindoc;
+        $this->referencecindoc = $referencecindoc;
 
         return $this;
     }
@@ -163,73 +163,91 @@ class Document
 
     public function getIdVille(): ?int
     {
-        return $this->idVille;
+        return $this->idville;
     }
 
-    public function setIdVille(?int $idVille): self
+    public function setIdVille(?int $idville): self
     {
-        $this->idVille = $idVille;
+        $this->idville = $idville;
 
         return $this;
     }
 
     public function getIdDate(): ?int
     {
-        return $this->idDate;
+        return $this->iddate;
     }
 
-    public function setIdDate(?int $idDate): self
+    public function setIdDate(?int $iddate): self
     {
-        $this->idDate = $idDate;
+        $this->iddate = $iddate;
 
         return $this;
     }
 
     public function getIdOeuvre(): ?int
     {
-        return $this->idOeuvre;
+        return $this->idoeuvre;
     }
 
-    public function setIdOeuvre(?int $idOeuvre): self
+    public function setIdOeuvre(?int $idoeuvre): self
     {
-        $this->idOeuvre = $idOeuvre;
+        $this->idoeuvre = $idoeuvre;
 
         return $this;
     }
 
     public function getIdSujet(): ?int
     {
-        return $this->idSujet;
+        return $this->idsujet;
     }
 
-    public function setIdSujet(?int $idSujet): self
+    public function setIdSujet(?int $idsujet): self
     {
-        $this->idSujet = $idSujet;
+        $this->idsujet = $idsujet;
 
         return $this;
     }
 
     public function getIdIco(): ?int
     {
-        return $this->idIco;
+        return $this->idico;
     }
 
-    public function setIdIco(?int $idIco): self
+    public function setIdIco(?int $idico): self
     {
-        $this->idIco = $idIco;
+        $this->idico = $idico;
 
         return $this;
     }
 
     public function getIdCliche(): ?int
     {
-        return $this->idCliche;
+        return $this->idcliche;
     }
 
-    public function setIdCliche(?int $idCliche): self
+    public function setIdCliche(?int $idcliche): self
     {
-        $this->idCliche = $idCliche;
+        $this->idcliche = $idcliche;
 
         return $this;
+    }
+
+    public function  toArray(): ?array{
+        return array(
+            $this->photoarticle,
+            $this->discriminant,
+            $this->ficnum,
+            $this->notebp,
+            $this->referencecindoc,
+            $this->n_v,
+            $this->c_g,
+            $this->idville,
+            $this->iddate,
+            $this->idoeuvre,
+            $this->idsujet,
+            $this->idico,
+            $this->idcliche
+        );
     }
 }

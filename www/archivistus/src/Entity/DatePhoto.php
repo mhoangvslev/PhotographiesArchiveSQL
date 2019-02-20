@@ -6,27 +6,28 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DatePhotoRepository")
+ * @ORM\Table(name="DatePhoto")
  */
 class DatePhoto
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="idDate", type="integer")
      */
     private $idDate;
 
     /**
-     * @ORM\Column(type="string", length=2, nullable=true)
+     * @ORM\Column(name = "dateJour", type="string", length=2, nullable=true)
      */
     private $dateJour;
 
     /**
-     * @ORM\Column(type="string", length=2, nullable=true)
+     * @ORM\Column(name="dateMois", type="string", length=2, nullable=true)
      */
     private $dateMois;
 
     /**
-     * @ORM\Column(type="string", length=4)
+     * @ORM\Column(name="dateAnnee", type="string", length=4)
      */
     private $dateAnnee;
 
@@ -76,5 +77,14 @@ class DatePhoto
         $this->dateAnnee = $dateAnnee;
 
         return $this;
+    }
+
+    public function toArray(){
+        return array(
+            $this->idDate,
+            $this->dateJour,
+            $this->dateMois,
+            $this->dateAnnee
+        );
     }
 }
