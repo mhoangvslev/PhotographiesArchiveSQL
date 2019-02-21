@@ -12,9 +12,9 @@ class Ville
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idVille", type="integer")
+     * @ORM\Column(name="idville", type="integer")
      */
-    private $idVille;
+    private $idville;
 
     /**
      * @ORM\Column(name="nomVille", type="string", length=255)
@@ -44,12 +44,12 @@ class Ville
 
     public function getIdVille(): ?int
     {
-        return $this->idVille;
+        return $this->idville;
     }
 
-    public function setIdVille(int $idVille): self
+    public function setIdVille(int $idville): self
     {
-        $this->idVille = $idVille;
+        $this->idville = $idville;
 
         return $this;
     }
@@ -116,7 +116,7 @@ class Ville
 
     public function toArray(){
         return array(
-            $this->idVille,
+            $this->idville,
             $this->nomVille,
             $this->latitude,
             $this->longitude,

@@ -12,9 +12,9 @@ class IndexPersonne
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idOeuvre", type="integer")
+     * @ORM\Column(name="idoeuvre", type="integer")
      */
-    private $idOeuvre;
+    private $idoeuvre;
 
     /**
      * @ORM\Column(name="nomOeuvre", type="string", length=255)
@@ -22,18 +22,19 @@ class IndexPersonne
     private $nomOeuvre;
 
     /**
-     * @ORM\Column(name="typeOeuvre", type="string", length=255)
+     * @ORM\ManyToOne(targetEntity="App\Entity\TypeOeuvre")
      */
-    private $typeOeuvre;
+    private $typeoeuvre;
+
 
     public function getIdOeuvre(): ?int
     {
-        return $this->idOeuvre;
+        return $this->idoeuvre;
     }
 
-    public function setIdOeuvre(int $idOeuvre): self
+    public function setIdOeuvre(int $idoeuvre): self
     {
-        $this->idOeuvre = $idOeuvre;
+        $this->idoeuvre = $idoeuvre;
 
         return $this;
     }
@@ -50,23 +51,23 @@ class IndexPersonne
         return $this;
     }
 
-    public function getTypeOeuvre(): ?string
-    {
-        return $this->typeOeuvre;
-    }
-
-    public function setTypeOeuvre(string $typeOeuvre): self
-    {
-        $this->typeOeuvre = $typeOeuvre;
-
-        return $this;
-    }
-
     public function toArray(){
         return array(
-            $this->idOeuvre,
+            $this->idoeuvre,
             $this->nomOeuvre,
             $this->typeOeuvre
         );
+    }
+
+    public function getTypeoeuvre(): ?TypeOeuvre
+    {
+        return $this->typeoeuvre;
+    }
+
+    public function setTypeoeuvre(?TypeOeuvre $typeoeuvre): self
+    {
+        $this->typeoeuvre = $typeoeuvre;
+
+        return $this;
     }
 }

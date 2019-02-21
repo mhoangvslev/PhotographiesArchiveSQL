@@ -12,9 +12,9 @@ class Serie
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idSerie", type="integer")
+     * @ORM\Column(name="idserie", type="integer")
      */
-    private $idSerie;
+    private $idserie;
 
     /**
      * @ORM\Column(name="nomSerie", type="string", length=255)
@@ -24,7 +24,7 @@ class Serie
 
     public function getIdSerie(): ?int
     {
-        return $this->idSerie;
+        return $this->idserie;
     }
 
     public function getNomSerie(): ?string
@@ -41,7 +41,7 @@ class Serie
 
     public function toArray(){
         return array(
-            $this->idSerie,
+            $this->idserie,
             $this->nomSerie
         );
     }

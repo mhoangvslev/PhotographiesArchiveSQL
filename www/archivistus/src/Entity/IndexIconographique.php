@@ -12,9 +12,9 @@ class IndexIconographique
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idIco", type="integer")
+     * @ORM\Column(name="idico", type="integer")
      */
-    private $idIco;
+    private $idico;
 
     /**
      * @ORM\Column(name="idx_ico", type="string", length=255)
@@ -28,12 +28,12 @@ class IndexIconographique
 
     public function getIdIco(): ?int
     {
-        return $this->idIco;
+        return $this->idico;
     }
 
-    public function setIdIco(int $idIco): self
+    public function setIdIco(int $idico): self
     {
-        $this->idIco = $idIco;
+        $this->idico = $idico;
 
         return $this;
     }
@@ -52,7 +52,7 @@ class IndexIconographique
 
     public function toArray(){
         return array(
-            $this->idIco,
+            $this->idico,
             $this->idx_ico
         );
     }

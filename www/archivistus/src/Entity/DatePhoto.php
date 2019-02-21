@@ -12,9 +12,9 @@ class DatePhoto
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idDate", type="integer")
+     * @ORM\Column(name="iddate", type="integer")
      */
-    private $idDate;
+    private $iddate;
 
     /**
      * @ORM\Column(name = "dateJour", type="string", length=2, nullable=true)
@@ -33,12 +33,12 @@ class DatePhoto
 
     public function getIdDate(): ?int
     {
-        return $this->idDate;
+        return $this->iddate;
     }
 
-    public function setIdDate(int $idDate): self
+    public function setIdDate(int $iddate): self
     {
-        $this->idDate = $idDate;
+        $this->iddate = $iddate;
 
         return $this;
     }
@@ -81,7 +81,7 @@ class DatePhoto
 
     public function toArray(){
         return array(
-            $this->idDate,
+            $this->iddate,
             $this->dateJour,
             $this->dateMois,
             $this->dateAnnee

@@ -12,7 +12,7 @@ class Cliche
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idCliche", type="integer")
+     * @ORM\Column(name="idcliche", type="integer")
      */
     private $idcliche;
 

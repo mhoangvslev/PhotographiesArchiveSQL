@@ -13,7 +13,7 @@ class Photo
      * @ORM\Id()
      * @ORM\Column(type="integer")
      */
-    private $Article;
+    private $article;
 
     /**
      * @ORM\Column(name="remarques", type="string", length=255, nullable=true)
@@ -31,14 +31,14 @@ class Photo
     private $descdet;
 
     /**
-     * @ORM\Column(name="idSerie", type="integer")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Serie")
      */
-    private $idSerie;
+    private $idserie;
 
 
-    public function getArticle(): ?int
+    public function getarticle(): ?int
     {
-        return $this->Article;
+        return $this->article;
     }
 
     public function getRemarques(): ?string
@@ -77,25 +77,25 @@ class Photo
         return $this;
     }
 
-    public function getIdSerie(): ?int
-    {
-        return $this->idSerie;
-    }
-
-    public function setIdSerie(int $idSerie): self
-    {
-        $this->idSerie = $idSerie;
-
-        return $this;
-    }
-
     public function toArray(){
         return array(
-            $this->Article,
+            $this->article,
             $this->remarques,
             $this->nbrcli,
             $this->descdet,
-            $this->idSerie
+            $this->idserie
         );
+    }
+
+    public function getIdserie(): ?Serie
+    {
+        return $this->idserie;
+    }
+
+    public function setIdserie(?Serie $idserie): self
+    {
+        $this->idserie = $idserie;
+
+        return $this;
     }
 }

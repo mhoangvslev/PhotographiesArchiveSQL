@@ -47,34 +47,41 @@ class Document
     private $c_g;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Ville")
+     * @ORM\JoinColumn(name="idVille", referencedColumnName="idVille")
      */
     private $idville;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $iddate;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $idoeuvre;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $idsujet;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\IndexIconographique")
+     * @ORM\JoinColumn(name="idico", referencedColumnName="idico")
      */
     private $idico;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\DatePhoto")
+     * @ORM\JoinColumn(name="iddate", referencedColumnName="iddate")
+     */
+    private $iddate;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\TypeOeuvre")
+     * @ORM\JoinColumn(name="idoeuvre", referencedColumnName="idtype")
+     */
+    private $idoeuvre;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\IndexPersonne")
+     * @ORM\JoinColumn(name="idsujet", referencedColumnName="idoeuvre")
+     */
+    private $idsujet;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Cliche")
+     * @ORM\JoinColumn(name="idcliche", referencedColumnName="idcliche")
      */
     private $idcliche;
+
 
 
     public function getPhotoArticle(): ?int
@@ -161,78 +168,6 @@ class Document
         return $this;
     }
 
-    public function getIdVille(): ?int
-    {
-        return $this->idville;
-    }
-
-    public function setIdVille(?int $idville): self
-    {
-        $this->idville = $idville;
-
-        return $this;
-    }
-
-    public function getIdDate(): ?int
-    {
-        return $this->iddate;
-    }
-
-    public function setIdDate(?int $iddate): self
-    {
-        $this->iddate = $iddate;
-
-        return $this;
-    }
-
-    public function getIdOeuvre(): ?int
-    {
-        return $this->idoeuvre;
-    }
-
-    public function setIdOeuvre(?int $idoeuvre): self
-    {
-        $this->idoeuvre = $idoeuvre;
-
-        return $this;
-    }
-
-    public function getIdSujet(): ?int
-    {
-        return $this->idsujet;
-    }
-
-    public function setIdSujet(?int $idsujet): self
-    {
-        $this->idsujet = $idsujet;
-
-        return $this;
-    }
-
-    public function getIdIco(): ?int
-    {
-        return $this->idico;
-    }
-
-    public function setIdIco(?int $idico): self
-    {
-        $this->idico = $idico;
-
-        return $this;
-    }
-
-    public function getIdCliche(): ?int
-    {
-        return $this->idcliche;
-    }
-
-    public function setIdCliche(?int $idcliche): self
-    {
-        $this->idcliche = $idcliche;
-
-        return $this;
-    }
-
     public function  toArray(): ?array{
         return array(
             $this->photoarticle,
@@ -249,5 +184,77 @@ class Document
             $this->idico,
             $this->idcliche
         );
+    }
+
+    public function getIdville(): ?Ville
+    {
+        return $this->idville;
+    }
+
+    public function setIdville(?Ville $idville): self
+    {
+        $this->idville = $idville;
+
+        return $this;
+    }
+
+    public function getIdico(): ?IndexIconographique
+    {
+        return $this->idico;
+    }
+
+    public function setIdico(?IndexIconographique $idico): self
+    {
+        $this->idico = $idico;
+
+        return $this;
+    }
+
+    public function getIddate(): ?DatePhoto
+    {
+        return $this->iddate;
+    }
+
+    public function setIddate(?DatePhoto $iddate): self
+    {
+        $this->iddate = $iddate;
+
+        return $this;
+    }
+
+    public function getIdoeuvre(): ?TypeOeuvre
+    {
+        return $this->idoeuvre;
+    }
+
+    public function setIdoeuvre(?TypeOeuvre $idoeuvre): self
+    {
+        $this->idoeuvre = $idoeuvre;
+
+        return $this;
+    }
+
+    public function getIdsujet(): ?IndexPersonne
+    {
+        return $this->idsujet;
+    }
+
+    public function setIdsujet(?IndexPersonne $idsujet): self
+    {
+        $this->idsujet = $idsujet;
+
+        return $this;
+    }
+
+    public function getIdcliche(): ?Cliche
+    {
+        return $this->idcliche;
+    }
+
+    public function setIdcliche(?Cliche $idcliche): self
+    {
+        $this->idcliche = $idcliche;
+
+        return $this;
     }
 }

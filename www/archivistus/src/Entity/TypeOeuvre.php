@@ -11,9 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 class TypeOeuvre
 {
     /**
-     * @ORM\Column(name="idType", type="integer")
+     * @ORM\Column(name="idtype", type="integer")
      */
-    private $idType;
+    private $idtype;
 
     /**
      * @ORM\Id()
@@ -23,12 +23,12 @@ class TypeOeuvre
 
     public function getIdType(): ?int
     {
-        return $this->idType;
+        return $this->idtype;
     }
 
-    public function setIdType(int $idType): self
+    public function setIdType(int $idtype): self
     {
-        $this->idType = $idType;
+        $this->idtype = $idtype;
 
         return $this;
     }
@@ -47,7 +47,7 @@ class TypeOeuvre
 
     public function toArray(){
         return array(
-            $this->idType,
+            $this->idtype,
             $this->nomType
         );
     }

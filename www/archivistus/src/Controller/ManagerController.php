@@ -14,12 +14,20 @@ use App\Entity\TableForm;
 use App\Entity\TypeOeuvre;
 use App\Entity\Ville;
 use App\Entity\Cliche;
+use App\Form\ClicheFormType;
+use App\Form\DatePhotoFormType;
 use App\Form\DocumentFormType;
+use App\Form\IndexIconographiqueFormType;
+use App\Form\IndexPersonneFormType;
+use App\Form\PhotoFormType;
+use App\Form\SerieFormType;
+use App\Form\SujetFormType;
+use App\Form\TypeOeuvreFormType;
+use App\Form\VilleFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -31,10 +39,36 @@ class ManagerController extends AbstractController
      * @Route("/manager/insert/{className}", name="managerInsert")
      */
     public function managerInsert(string $className, Request $request){
-
         switch ($className){
             case Document::class:
                 $formClass = DocumentFormType::class;
+                break;
+            case Cliche::class:
+                $formClass = ClicheFormType::class;
+                break;
+            case DatePhoto::class:
+                $formClass = DatePhotoFormType::class;
+                break;
+            case IndexIconographique::class:
+                $formClass = IndexIconographiqueFormType::class;
+                break;
+            case IndexPersonne::class:
+                $formClass = IndexPersonneFormType::class;
+                break;
+            case Photo::class:
+                $formClass = PhotoFormType::class;
+                break;
+            case Serie::class:
+                $formClass = SerieFormType::class;
+                break;
+            case Sujet::class:
+                $formClass = SujetFormType::class;
+                break;
+            case TypeOeuvre::class:
+                $formClass = TypeOeuvreFormType::class;
+                break;
+            case Ville::class:
+                $formClass = VilleFormType::class;
                 break;
             default:
                 $formClass =  DocumentFormType::class;

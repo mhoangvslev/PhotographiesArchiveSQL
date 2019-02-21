@@ -12,9 +12,9 @@ class Sujet
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(name="idSujet", type="integer")
+     * @ORM\Column(name="idsujet", type="integer")
      */
-    private $idSujet;
+    private $idsujet;
 
     /**
      * @ORM\Column(name="descSujet", type="string", length=255)
@@ -23,12 +23,12 @@ class Sujet
 
     public function getIdSujet(): ?int
     {
-        return $this->idSujet;
+        return $this->idsujet;
     }
 
-    public function setIdSujet(int $idSujet): self
+    public function setIdSujet(int $idsujet): self
     {
-        $this->idSujet = $idSujet;
+        $this->idsujet = $idsujet;
 
         return $this;
     }
@@ -47,7 +47,7 @@ class Sujet
 
     public function toArray(){
         return array(
-            $this->idSujet,
+            $this->idsujet,
             $this->descSujet
         );
     }
