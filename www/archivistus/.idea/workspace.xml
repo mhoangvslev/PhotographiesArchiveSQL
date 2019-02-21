@@ -2,8 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff8935aa-7883-4a21-9b3b-26d848b3d347" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Form/DocumentFormType.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.sh" beforeDir="false" afterPath="$PROJECT_DIR$/setup.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/ManagerController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/ManagerController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/ClicheFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/ClicheFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/DataPhotoFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/DataPhotoFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/DocumentFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/DocumentFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/IndexIconographiqueFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/IndexIconographiqueFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/IndexPersonneFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/IndexPersonneFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/PhotoFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/PhotoFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/SerieFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/SerieFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/SujetFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/SujetFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/TypeOeuvreFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/TypeOeuvreFormType.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/VilleFormType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/VilleFormType.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,8 +31,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Controller/ManagerController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="82">
-              <caret line="136" column="21" selection-start-line="136" selection-end-line="137" />
+            <state relative-caret-position="786">
+              <caret line="89" selection-start-line="89" selection-end-line="89" />
               <folding>
                 <element signature="e#34#59#0#PHP" expanded="true" />
               </folding>
@@ -28,29 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Entity/Document.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="471">
-              <caret line="122" column="40" selection-start-line="122" selection-start-column="40" selection-end-line="122" selection-end-column="40" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Form/DocumentFormType.php">
+        <entry file="file://$PROJECT_DIR$/src/Form/ClicheFormType.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="28" column="69" selection-start-line="28" selection-start-column="69" selection-end-line="28" selection-end-column="69" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Form/DataPhotoFormType.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="19" column="69" lean-forward="true" selection-start-line="18" selection-start-column="12" selection-end-line="19" selection-end-column="69" />
+            <state relative-caret-position="195">
+              <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -109,12 +103,12 @@
         <option value="$PROJECT_DIR$/src/Entity/Serie.php" />
         <option value="$PROJECT_DIR$/src/Entity/Sujet.php" />
         <option value="$PROJECT_DIR$/src/Entity/TypeOeuvre.php" />
-        <option value="$PROJECT_DIR$/src/Controller/ManagerController.php" />
         <option value="$PROJECT_DIR$/src/Entity/IndexPersonne.php" />
         <option value="$PROJECT_DIR$/src/Entity/Document.php" />
         <option value="$PROJECT_DIR$/src/Entity/Cliche.php" />
         <option value="$PROJECT_DIR$/src/Entity/Ville.php" />
-        <option value="$PROJECT_DIR$/src/Form/ClicheFormType.php" />
+        <option value="$PROJECT_DIR$/src/Controller/ManagerController.php" />
+        <option value="$PROJECT_DIR$/src/Form/DocumentFormType.php" />
         <option value="$PROJECT_DIR$/src/Form/DataPhotoFormType.php" />
         <option value="$PROJECT_DIR$/src/Form/IndexIconographiqueFormType.php" />
         <option value="$PROJECT_DIR$/src/Form/IndexPersonneFormType.php" />
@@ -123,7 +117,7 @@
         <option value="$PROJECT_DIR$/src/Form/SujetFormType.php" />
         <option value="$PROJECT_DIR$/src/Form/TypeOeuvreFormType.php" />
         <option value="$PROJECT_DIR$/src/Form/VilleFormType.php" />
-        <option value="$PROJECT_DIR$/src/Form/DocumentFormType.php" />
+        <option value="$PROJECT_DIR$/src/Form/ClicheFormType.php" />
       </list>
     </option>
   </component>
@@ -349,12 +343,12 @@
       <workItem from="1550667532967" duration="14972000" />
       <workItem from="1550691924264" duration="4883000" />
       <workItem from="1550702563628" duration="809000" />
-      <workItem from="1550759556009" duration="8412000" />
+      <workItem from="1550759556009" duration="9437000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="33877000" />
+    <option name="totallyTimeSpent" value="34902000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
@@ -530,48 +524,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Controller/ManagerController.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="136" column="21" selection-start-line="136" selection-end-line="137" />
-          <folding>
-            <element signature="e#34#59#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/ClicheFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="17" column="69" selection-start-line="16" selection-start-column="12" selection-end-line="17" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Entity/Ville.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-690">
           <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/IndexIconographiqueFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="17" column="69" selection-start-line="17" selection-start-column="69" selection-end-line="17" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/IndexPersonneFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="18" column="69" selection-start-line="18" selection-start-column="69" selection-end-line="18" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/PhotoFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="20" column="69" selection-start-line="20" selection-start-column="69" selection-end-line="20" selection-end-column="69" />
         </state>
       </provider>
     </entry>
@@ -582,31 +538,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/SerieFormType.php">
+    <entry file="file://$PROJECT_DIR$/src/Form/DocumentFormType.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="17" column="69" selection-start-line="17" selection-start-column="69" selection-end-line="17" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/SujetFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="17" column="69" selection-start-line="17" selection-start-column="69" selection-end-line="17" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/TypeOeuvreFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="17" column="69" selection-start-line="17" selection-start-column="69" selection-end-line="17" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/VilleFormType.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="21" column="69" selection-start-line="21" selection-start-column="69" selection-end-line="21" selection-end-column="69" />
+        <state relative-caret-position="90">
+          <caret line="6" column="41" selection-start-line="6" selection-end-line="7" />
         </state>
       </provider>
     </entry>
@@ -619,15 +554,77 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Form/DataPhotoFormType.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="19" column="69" lean-forward="true" selection-start-line="18" selection-start-column="12" selection-end-line="19" selection-end-column="69" />
+        <state relative-caret-position="285">
+          <caret line="19" column="45" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+          <folding>
+            <element signature="e#28#53#0#PHP" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Form/DocumentFormType.php">
+    <entry file="file://$PROJECT_DIR$/src/Form/IndexPersonneFormType.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="28" column="69" selection-start-line="28" selection-start-column="69" selection-end-line="28" selection-end-column="69" />
+        <state relative-caret-position="210">
+          <caret line="18" column="45" selection-start-line="18" selection-start-column="45" selection-end-line="18" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/PhotoFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="20" column="45" selection-start-line="20" selection-start-column="45" selection-end-line="20" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/SerieFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/SujetFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/TypeOeuvreFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/VilleFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="21" column="45" selection-start-line="21" selection-start-column="45" selection-end-line="21" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/IndexIconographiqueFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Controller/ManagerController.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="786">
+          <caret line="89" selection-start-line="89" selection-end-line="89" />
+          <folding>
+            <element signature="e#34#59#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Form/ClicheFormType.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="45" selection-start-line="17" selection-start-column="45" selection-end-line="17" selection-end-column="45" />
         </state>
       </provider>
     </entry>

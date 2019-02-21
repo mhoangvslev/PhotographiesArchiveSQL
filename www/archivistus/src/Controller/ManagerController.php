@@ -82,13 +82,11 @@ class ManagerController extends AbstractController
             $data = $form->getData();
 
             // Search case
-            if($form->getClickedButton() && 'Search' === $form->getClickedButton()->getName()) {
-                $query_result = $this->search($data);
+            if($form->getClickedButton() && 'Insert/Update' === $form->getClickedButton()->getName()) {
             }
 
             // Search case
-            if($form->getClickedButton() && 'Manage' === $form->getClickedButton()->getName()) {
-                return $this->redirectToRoute('managerInsert', array('className' => $data->getTableName()));
+            if($form->getClickedButton() && 'Delete' === $form->getClickedButton()->getName()) {
             }
         }
 
