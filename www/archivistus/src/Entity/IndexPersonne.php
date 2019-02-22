@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\IndexPersonneRepository")
  * @ORM\Table(name="IndexPersonne")
  */
-class IndexPersonne
+class IndexPersonne implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -17,15 +17,20 @@ class IndexPersonne
     private $idoeuvre;
 
     /**
-     * @ORM\Column(name="nomOeuvre", type="string", length=255)
+     * @ORM\Column(name="nomoeuvre", type="string", length=255)
      */
-    private $nomOeuvre;
+    private $nomoeuvre;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\TypeOeuvre")
+     * @ORM\JoinColumn(name="typeoeuvre", referencedColumnName="idtype")
      */
     private $typeoeuvre;
 
+    public function getId(): ?int
+    {
+        return $this->idoeuvre;
+    }
 
     public function getIdOeuvre(): ?int
     {
@@ -41,33 +46,40 @@ class IndexPersonne
 
     public function getNomOeuvre(): ?string
     {
-        return $this->nomOeuvre;
+        return $this->nomoeuvre;
     }
 
-    public function setNomOeuvre(string $nomOeuvre): self
+    public function setNomOeuvre(string $nomoeuvre): self
     {
-        $this->nomOeuvre = $nomOeuvre;
+        $this->nomoeuvre = $nomoeuvre;
 
         return $this;
     }
 
     public function toArray(){
         return array(
-            $this->idoeuvre,
-            $this->nomOeuvre,
-            $this->typeOeuvre
+            "idoeuvre" => $this->idoeuvre,
+            "nomoeuvre" => $this->nomoeuvre,
+            "typepeuvre" => $this->typeoeuvre
         );
     }
 
-    public function getTypeoeuvre(): ?TypeOeuvre
+    public function getTypeOeuvre(): ?TypeOeuvre
     {
         return $this->typeoeuvre;
     }
 
-    public function setTypeoeuvre(?TypeOeuvre $typeoeuvre): self
+    public function setTypeOeuvre(?TypeOeuvre $typeoeuvre): self
     {
         $this->typeoeuvre = $typeoeuvre;
 
         return $this;
+    }
+
+    public function updateAll($entity)
+    {
+        $this->idoeuvre = ($this->idoeuvre != $entity->getIdOeuvre()) ? $entity->getIdOeuvre() : $this->idoeuvre;
+        $this->nomoeuvre = ($this->nomoeuvre != $entity->getNomEuvre()) ? $entity->getNomOeuvre() : $this->nomoeuvre;
+        $this->typeoeuvre = ($this->typeoeuvre != $entity->getTypeOeuvre()) ? $entity->getTypeOeuvre() : $this->typeoeuvre;
     }
 }

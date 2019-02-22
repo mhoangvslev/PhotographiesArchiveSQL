@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\VilleRepository")
  * @ORM\Table(name="Ville")
  */
-class Ville
+class Ville implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -116,12 +116,29 @@ class Ville
 
     public function toArray(){
         return array(
-            $this->idville,
-            $this->nomVille,
-            $this->latitude,
-            $this->longitude,
-            $this->coordx,
-            $this->coordy
+            "idville" => $this->idville,
+            "nomVille" => $this->nomVille,
+            "latitude" => $this->latitude,
+            "longitude" => $this->longitude,
+            "coordx" => $this->coordx,
+            "coordy" => $this->coordy
         );
     }
+
+    public function getId(): ?int
+    {
+        return $this->getIdVille();
+    }
+
+    public function updateAll($entity)
+    {
+        $this->idville = ($entity->getIdVille() != $this->idville) ? $entity->getIdVille() : $this->idville;
+        $this->nomVille = ($entity->getNomVille() != $this->nomVille) ? $entity->getNomVille() : $this->nomVille;
+        $this->latitude = ($entity->getLatitude() != $this->latitude) ? $entity->getLongitude() : $this->latitude;
+        $this->longitude = ($entity->getLongitude() != $this->longitude) ? $entity->getLongitude() : $this->longitude;
+        $this->coordx = ($entity->getCoordx() != $this->coordx) ? $entity->getCoordx() : $this->coordx;
+        $this->coordy = ($entity->getCoordy() != $this->coordy) ? $entity->getCoordy() : $this->coordy;
+    }
+
+
 }

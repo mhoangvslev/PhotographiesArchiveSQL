@@ -7,17 +7,16 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
  */
-class Document
+class Document implements GenericEntity
 {
 
     /**
-     * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Id @ORM\Column(type="integer")
      */
     private $photoarticle;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Id @ORM\Column(type="integer")
      */
     private $discriminant;
 
@@ -48,7 +47,7 @@ class Document
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Ville")
-     * @ORM\JoinColumn(name="idVille", referencedColumnName="idVille")
+     * @ORM\JoinColumn(name="idville", referencedColumnName="idville")
      */
     private $idville;
 
@@ -168,93 +167,118 @@ class Document
         return $this;
     }
 
-    public function  toArray(): ?array{
-        return array(
-            $this->photoarticle,
-            $this->discriminant,
-            $this->ficnum,
-            $this->notebp,
-            $this->referencecindoc,
-            $this->n_v,
-            $this->c_g,
-            $this->idville,
-            $this->iddate,
-            $this->idoeuvre,
-            $this->idsujet,
-            $this->idico,
-            $this->idcliche
-        );
-    }
 
-    public function getIdville(): ?Ville
+    public function getIdVille(): ?Ville
     {
         return $this->idville;
     }
 
-    public function setIdville(?Ville $idville): self
+    public function setIdVille(?Ville $idville): self
     {
         $this->idville = $idville;
 
         return $this;
     }
 
-    public function getIdico(): ?IndexIconographique
+    public function getIdIco(): ?IndexIconographique
     {
         return $this->idico;
     }
 
-    public function setIdico(?IndexIconographique $idico): self
+    public function setIdIco(?IndexIconographique $idico): self
     {
         $this->idico = $idico;
 
         return $this;
     }
 
-    public function getIddate(): ?DatePhoto
+    public function getIdDate(): ?DatePhoto
     {
         return $this->iddate;
     }
 
-    public function setIddate(?DatePhoto $iddate): self
+    public function setIdDate(?DatePhoto $iddate): self
     {
         $this->iddate = $iddate;
 
         return $this;
     }
 
-    public function getIdoeuvre(): ?TypeOeuvre
+    public function getIdOeuvre(): ?TypeOeuvre
     {
         return $this->idoeuvre;
     }
 
-    public function setIdoeuvre(?TypeOeuvre $idoeuvre): self
+    public function setIdOeuvre(?TypeOeuvre $idoeuvre): self
     {
         $this->idoeuvre = $idoeuvre;
 
         return $this;
     }
 
-    public function getIdsujet(): ?IndexPersonne
+    public function getIdSujet(): ?IndexPersonne
     {
         return $this->idsujet;
     }
 
-    public function setIdsujet(?IndexPersonne $idsujet): self
+    public function setIdSujet(?IndexPersonne $idsujet): self
     {
         $this->idsujet = $idsujet;
 
         return $this;
     }
 
-    public function getIdcliche(): ?Cliche
+    public function getIdCliche(): ?Cliche
     {
         return $this->idcliche;
     }
 
-    public function setIdcliche(?Cliche $idcliche): self
+    public function setIdCliche(?Cliche $idcliche): self
     {
         $this->idcliche = $idcliche;
 
         return $this;
     }
+
+    public function  toArray(): ?array{
+        return array(
+            "photoarticle" => $this->photoarticle,
+            "discriminant" => $this->discriminant,
+            "ficnum" => $this->ficnum,
+            "notebp" => $this->notebp,
+            "referencecindoc" => $this->referencecindoc,
+            "n_v" => $this->n_v,
+            "c_g" => $this->c_g,
+            "idville" => $this->idville,
+            "iddate" => $this->iddate,
+            "idoeuvre" => $this->idoeuvre,
+            "idsujet" => $this->idsujet,
+            "idico" => $this->idico,
+            "idcliche" => $this->idcliche
+        );
+    }
+
+    public function getId(): ?int
+    {
+        return $this->photoarticle;
+    }
+
+    public function updateAll($entity)
+    {
+        $this->photoarticle = ($entity->getPhotoArticle() != $this->photoarticle) ? $entity->getPhotoArticle() : $this->photoarticle;
+        $this->discriminant = ($entity->getDiscriminant() != $this->discriminant) ? $entity->getDiscriminant() : $this->discriminant;
+        $this->ficnum = ($entity->getFicnum() != $this->ficnum) ? $entity->getFicnum() : $this->ficnum;
+        $this->notebp = ($entity->getNotebp() != $this->notebp) ? $entity->getNotebp() : $this->notebp;
+        $this->referencecindoc = ($entity->getReferenceCindoc() != $this->referencecindoc) ? $entity->getReferenceCindoc() : $this->referencecindoc;
+        $this->n_v = ($entity->getNV() != $this->n_v) ? $entity->getNV() : $this->n_v;
+        $this->c_g = ($entity->getCG() != $this->c_g) ? $entity->getCG() : $this->c_g;
+        $this->idville = ($entity->getIdVille() != $this->idville) ? $entity->getIdVille() : $this->idville;
+        $this->iddate = ($entity->getIdDate() != $this->iddate) ? $entity->getIdDate() : $this->iddate;
+        $this->idoeuvre = ($entity->getIdOeuvre() != $this->idoeuvre) ? $entity->getIdOeuvre() : $this->idoeuvre;
+        $this->idsujet = ($entity->getIdSujet() != $this->idsujet) ? $entity->getIdSujet() : $this->idsujet;
+        $this->idico = ($entity->getIdIco() != $this->idico) ? $entity->getIdIco() : $this->idico;
+        $this->idcliche = ($entity->getIdCliche() != $this->idcliche) ? $entity->getIdCliche() : $this->idcliche;
+    }
+
+
 }

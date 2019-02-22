@@ -10,13 +10,12 @@ use App\Entity\Photo;
 use App\Entity\Serie;
 use App\Entity\Sujet;
 use App\Entity\DatabaseForm;
-use App\Entity\TableForm;
 use App\Entity\TypeOeuvre;
 use App\Entity\Ville;
 use App\Entity\Cliche;
 use App\Form\ClicheFormType;
-use App\Form\DatePhotoFormType;
 use App\Form\DocumentFormType;
+use App\Form\DatePhotoFormType;
 use App\Form\IndexIconographiqueFormType;
 use App\Form\IndexPersonneFormType;
 use App\Form\PhotoFormType;
@@ -24,9 +23,10 @@ use App\Form\SerieFormType;
 use App\Form\SujetFormType;
 use App\Form\TypeOeuvreFormType;
 use App\Form\VilleFormType;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,11 +34,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ManagerController extends AbstractController
 {
-
     /**
      * @Route("/manager/insert/{className}", name="managerInsert")
      */
     public function managerInsert(string $className, Request $request){
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $query_result = array(
+            'tableHeads' => $entityManager->getClassMetadata($className)->getFieldNames(),
+            'tableContents' => $entityManager->getRepository($className)->findBy(array(), array(), 100, array()),
+        );
+
         switch ($className){
             case Document::class:
                 $formClass = DocumentFormType::class;
@@ -81,29 +87,35 @@ class ManagerController extends AbstractController
         if($form->isSubmitted() && $form->isValid()){
             $data = $form->getData();
 
-            // Search case
-            if($form->getClickedButton() && 'Insert/Update' === $form->getClickedButton()->getName()) {
+            // Insert/Update case
+            if($form->getClickedButton() && 'Insert' === $form->getClickedButton()->getName()) {
+                $this->insert($data);
+            }
+
+            // Insert/Update case
+            if($form->getClickedButton() && 'Update' === $form->getClickedButton()->getName()) {
+                $this->update($data);
+            }
+
+            // Delete case
+            if($form->getClickedButton() && 'Delete' === $form->getClickedButton()->getName()) {
+                $this->delete($data);
             }
 
             // Search case
-            if($form->getClickedButton() && 'Delete' === $form->getClickedButton()->getName()) {
+            if($form->getClickedButton() && 'Search' === $form->getClickedButton()->getName()) {
+                $query_result = $this->search(array(
+                    'queryTable' => get_class($data),
+                    'queryCriteria' => array_filter($data->toArray()),
+                    'queryLimit' => $form->get('queryLimit')->getData()
+                ));
             }
         }
 
-
-        $entityManager = $this->getDoctrine()->getManager();
-        $this->fieldChoices = $entityManager->getClassMetadata($className)->getFieldNames();
-        $query_result = array(
-            'tableName' => $className,
-            'tableHeads' => $entityManager->getClassMetadata($className)->getFieldNames(),
-            'tableContents' => $entityManager->getRepository($className)->findBy(array(), array(), 10, array()),
-        );
-
-        return $this->render('manager/insertDocument.html.twig', [
+        return $this->render('manager/EntityManager.html.twig', [
             'controller_name' => 'ManagerController',
             'tableName' => $className,
             'tableForm' => $form->createView(),
-            'query_name' => $query_result['tableName'],
             'query_field' => $query_result['tableHeads'],
             'query_result' => $query_result['tableContents'],
         ]);
@@ -130,27 +142,14 @@ class ManagerController extends AbstractController
                     'Ville' => Ville::class
                 ]
             ])
-            ->add('queryLimit', IntegerType::class)
-            ->add("Search", SubmitType::class, ['label' => 'Search'])
             ->add("Manage", SubmitType::class, ['label' => 'Manage'])
             ->getForm();
-
-        $query_result = array(
-            'tableName' => null,
-            'tableHeads' => null,
-            'tableContents' => null
-        );
 
         $dbForm->handleRequest($request);
         if($dbForm->isSubmitted() && $dbForm->isValid()){
             $data = $dbForm->getData();
 
-            // Search case
-            if($dbForm->getClickedButton() && 'Search' === $dbForm->getClickedButton()->getName()) {
-                $query_result = $this->search($data);
-            }
-
-            // Search case
+            // Manage
             if($dbForm->getClickedButton() && 'Manage' === $dbForm->getClickedButton()->getName()) {
                 return $this->redirectToRoute('managerInsert', array('className' => $data->getTableName()));
             }
@@ -159,22 +158,18 @@ class ManagerController extends AbstractController
         return $this->render('manager/index.html.twig', [
             'controller_name' => 'ManagerController',
             'databaseForm' => $dbForm->createView(),
-            //'tableForm' => $tbForm->createView(),
-            'query_name' => $query_result['tableName'],
-            'query_field' => $query_result['tableHeads'],
-            'query_result' => $query_result['tableContents'],
         ]);
     }
 
 
-    public function search($data)
+    public function search(array $query)
     {
+        dump($query);
+
         $entityManager = $this->getDoctrine()->getManager();
-        $this->fieldChoices = $entityManager->getClassMetadata($data->getTableName())->getFieldNames();
         $result = array(
-            'tableName' => $data->getTableName(),
-            'tableHeads' => $entityManager->getClassMetadata($data->getTableName())->getFieldNames(),
-            'tableContents' => $entityManager->getRepository($data->getTableName())->findBy(array(), array(), $data->getQueryLimit(), array()),
+            'tableHeads' => $entityManager->getClassMetadata($query['queryTable'])->getFieldNames(),
+            'tableContents' => $entityManager->getRepository($query['queryTable'])->findBy($query['queryCriteria'], array(), $query['queryLimit'], array()),
         );
         return $result;
     }
@@ -182,16 +177,46 @@ class ManagerController extends AbstractController
     public function insert($data)
     {
         /* à completer*/
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($data);
+        $entityManager->flush();
+
+        return array(
+            'tableHeads' => $entityManager->getClassMetadata(get_class($data))->getFieldNames(),
+            'tableContents' => $entityManager->getRepository(get_class($data))->findBy(array(), array(), 100, array()),
+        );
     }
 
     public function update($data)
     {
         /* à completer*/
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $entities = $entityManager->getRepository(get_class($data))->findBy(array_filter($data->toArray()), array(), array(), array());
+
+        foreach ($entities as $entity){
+            $entity->updateAll($data);
+        }
+        $entityManager->flush();
+
+        return array(
+            'tableHeads' => $entityManager->getClassMetadata(get_class($data))->getFieldNames(),
+            'tableContents' => $entityManager->getRepository(get_class($data))->findBy(array(), array(), 100, array()),
+        );
     }
 
     public function delete($data)
     {
         /* à completer*/
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $entityManager->merge($data);
+        $entityManager->remove($data);
+        $entityManager->flush();
+
+        return array(
+            'tableHeads' => $entityManager->getClassMetadata(get_class($data))->getFieldNames(),
+            'tableContents' => $entityManager->getRepository(get_class($data))->findBy(array(), array(), 100, array()),
+        );
 
     }
 

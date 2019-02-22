@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\IndexIconographiqueRepository")
  * @ORM\Table(name="IndexIconographique")
  */
-class IndexIconographique
+class IndexIconographique implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -23,7 +23,7 @@ class IndexIconographique
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idico;
     }
 
     public function getIdIco(): ?int
@@ -52,8 +52,16 @@ class IndexIconographique
 
     public function toArray(){
         return array(
-            $this->idico,
-            $this->idx_ico
+            "idico" => $this->idico,
+            "idx_ico" => $this->idx_ico
         );
     }
+
+    public function updateAll($entity)
+    {
+        $this->idico = ($entity->getIdIco() != $this->idico) ? $entity->getIdIco() : $this->idico;
+        $this->idx_ico = ($entity->getIdIco() != $this->idx_ico) ? $entity->getIdIco() : $this->idx_ico;
+    }
+
+
 }

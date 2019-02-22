@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\ClicheRepository")
  * @ORM\Table(name="Cliche")
  */
-class Cliche
+class Cliche implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -46,10 +46,27 @@ class Cliche
         return $this;
     }
 
+    /**
+     * Convert entity to array
+     * @return array for display
+     */
     public function toArray(){
         return array(
-            $this->idcliche,
-            $this->taille
+            "idcliche" => $this->idcliche,
+            "taille" => $this->taille
         );
     }
+
+    public function getId(): ?int
+    {
+        return $this->getIdCliche();
+    }
+
+    public function updateAll($entity)
+    {
+        $this->idcliche = ($entity->getIdCliche() != $this->idcliche) ? $entity->getIdCliche() : $this->idcliche;
+        $this->taille = ($entity->getTaille() != $this->taille) ? $entity->getTaille() : $this->taille;
+    }
+
+
 }

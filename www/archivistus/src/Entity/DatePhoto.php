@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\DatePhotoRepository")
  * @ORM\Table(name="DatePhoto")
  */
-class DatePhoto
+class DatePhoto implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -81,10 +81,24 @@ class DatePhoto
 
     public function toArray(){
         return array(
-            $this->iddate,
-            $this->dateJour,
-            $this->dateMois,
-            $this->dateAnnee
+            "iddate" => $this->iddate,
+            "dateJour" => $this->dateJour,
+            "dateMois" => $this->dateMois,
+            "dateAnnee" => $this->dateAnnee
         );
     }
+
+    public function getId(): ?int
+    {
+        return $this->iddate;
+    }
+
+    public function updateAll($entity)
+    {
+        $this->iddate = ($entity->getIdDate() == $this->iddate) ? $entity->getIdDate() : $this->iddate;
+        $this->dateJour = ($entity->setDateJour() == $this->dateJour) ? $entity->setDateJour() : $this->dateJour;
+        $this->dateMois = ($entity->getDateMois() == $this->dateMois) ? $entity->getDateMois() : $this->dateMois;
+        $this->dateAnnee = ($entity->getDateAnnee() == $this->dateAnnee) ? $entity->getDateAnnee() : $this->dateAnnee;
+    }
+
 }

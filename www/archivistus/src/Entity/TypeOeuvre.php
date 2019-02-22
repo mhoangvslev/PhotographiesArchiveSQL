@@ -8,18 +8,23 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\TypeOeuvreRepository")
  * @ORM\Table(name="TypeOeuvre")
  */
-class TypeOeuvre
+class TypeOeuvre implements GenericEntity
 {
     /**
+     * @ORM\Id()
      * @ORM\Column(name="idtype", type="integer")
      */
     private $idtype;
 
     /**
-     * @ORM\Id()
      * @ORM\Column(name="nomType", type="string", length=255)
      */
     private $nomType;
+
+    public function getId(): ?int
+    {
+        return $this->idtype;
+    }
 
     public function getIdType(): ?int
     {
@@ -47,8 +52,14 @@ class TypeOeuvre
 
     public function toArray(){
         return array(
-            $this->idtype,
-            $this->nomType
+            "idtype" => $this->idtype,
+            "nomtype" => $this->nomType
         );
+    }
+
+    public function updateAll($entity)
+    {
+        $this->idtype = ($entity->getIdType() != $this->idtype) ? $entity->getIdType() : $this->idtype;
+        $this->nomType = ($entity->getNomType() != $this->nomType) ? $entity->getNomType() : $this->nomType;
     }
 }

@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PhotoRepository")
  */
-class Photo
+class Photo implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -79,11 +79,11 @@ class Photo
 
     public function toArray(){
         return array(
-            $this->article,
-            $this->remarques,
-            $this->nbrcli,
-            $this->descdet,
-            $this->idserie
+            "article" => $this->article,
+            "remmarques" => $this->remarques,
+            "nbrecli" => $this->nbrcli,
+            "descdet" => $this->descdet,
+            "idserie" => $this->idserie
         );
     }
 
@@ -98,4 +98,20 @@ class Photo
 
         return $this;
     }
+
+    public function getId(): ?int
+    {
+        return $this->getarticle();
+    }
+
+    public function updateAll($entity)
+    {
+        $this->article = ($entity->getId() != $this->article) ? $entity->getId() : $this->article;
+        $this->remarques = ($entity->getRemarques() != $this->remarques) ? $entity->getRemarques() : $this->remarques;
+        $this->nbrcli = ($entity->getNbrcli() != $this->nbrcli) ? $entity->getNbrcli() : $this->nbrcli;
+        $this->descdet = ($entity->getDescdet() != $this->descdet) ? $entity->getDescdet() : $this->descdet;
+        $this->idserie = ($entity->getSerie() != $this->idserie) ? $entity->getSerie() : $this->idserie;
+    }
+
+
 }

@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\SujetRepository")
  * @ORM\Table(name="Sujet")
  */
-class Sujet
+class Sujet implements GenericEntity
 {
     /**
      * @ORM\Id()
@@ -47,8 +47,21 @@ class Sujet
 
     public function toArray(){
         return array(
-            $this->idsujet,
-            $this->descSujet
+            "idsujet" => $this->idsujet,
+            "descSujet" => $this->descSujet
         );
     }
+
+    public function getId(): ?int
+    {
+        return $this->idsujet;
+    }
+
+    public function updateAll($entity)
+    {
+        $this->idsujet = ($entity->getIdSujet() != $this->idsujet) ? $entity->getIdSujet() : $this->idsujet;
+        $this->descSujet = ($entity->getDescSujet() != $this->descSujet) ? $entity->getDescSujet() : $this->descSujet;
+    }
+
+
 }

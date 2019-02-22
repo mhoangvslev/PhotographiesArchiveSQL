@@ -21,16 +21,6 @@ class DatabaseForm
      */
     private $tableName;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $queryLimit;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $queryField;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -44,30 +34,6 @@ class DatabaseForm
     public function setTableName(string $tableName): self
     {
         $this->tableName = $tableName;
-
-        return $this;
-    }
-
-    public function getQueryLimit(): ?int
-    {
-        return $this->queryLimit;
-    }
-
-    public function setQueryLimit(int $queryLimit): self
-    {
-        $this->queryLimit = $queryLimit;
-
-        return $this;
-    }
-
-    public function getQueryField(): ?string
-    {
-        return $this->queryField;
-    }
-
-    public function setQueryField(?string $queryField): self
-    {
-        $this->queryField = $queryField;
 
         return $this;
     }

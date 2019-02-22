@@ -1,0 +1,45 @@
+{% extends 'manager/index.html.twig' %}
+
+{% block title %}Insérer dans la base de données{% endblock %}
+
+{% block tableTitle %}
+    Contenu de <strong>{{ tableName }}</strong>:
+{% endblock %}
+
+{% block databaseForm %}
+    <div style="display: -ms-flexbox">
+        {{ form(tableForm) }}
+    </div>
+{% endblock %}
+
+{% block tableHeads %}
+    <tr>
+        {% for row in query_field %}
+            <th>{{ row }}</th>
+        {% endfor %}
+    </tr>
+{% endblock %}
+
+{% block tableContents %}
+    {% for row in query_result %}
+        <tr>
+            {% for field in row.toArray() %}
+                {% if field is Entity %}
+                    <td>{{ field.getId() }}</td>
+                {% else %}
+                    <td>{{ field }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+{% block tableFeet %}
+    <tr>
+        {% for row in query_field %}
+            <th>{{ row }}</th>
+        {% endfor %}
+    </tr>
+{% endblock %}
+
