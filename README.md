@@ -37,6 +37,9 @@ Les données sont fournies en format CSV avec les intitulés suivants :
 
 |----grafana: le tableau de bord
 
+## Archivistus
+**Archivistus** est un outil de gestion permettant aux archivistes de mettre à jour la base de données. Cette application est fait avec Symfony et intègre Grafana. Ref: docs/guides
+
 ## Rapport:
 - Gestion du projet:
 [Trello](https://trello.com/b/traOSgOr/tea-bd)
